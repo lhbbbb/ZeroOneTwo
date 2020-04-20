@@ -76,3 +76,9 @@ print('rotation angle: ', rotation_angle)
 # tilted angle
 titled_angle = abs(np.rad2deg(angles[0] - angles[1]))
 print('tilted angle: ', titled_angle)
+
+# image area ratio
+area = cv2.contourArea(screenCnt)
+image_area = image.shape[0] * image.shape[1]
+print(image_area)
+print('area ratio: ', area / image_area)

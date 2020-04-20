@@ -144,3 +144,6 @@ sketch
 # End of https://www.gitignore.io/api/react
 
 .vscode
+
+# dataset raw image
+Models/image/datasets/raw

@@ -58,3 +58,12 @@ https://tech.trivago.com/2015/10/06/python_receipt_parser/
 https://www.depends-on-the-definition.com/named-entity-recognition-with-bert/
 
 https://medium.com/@Fivestars/receipt-parsing-via-machine-learning-1a3c495394d9
+
+---
+
+### Regular Expression 
+
+https://fairbrite.github.io/2019/DevStarLeague/20190720/presentation/05_legacy.pdf
+
+### OCR Post-Processing Text Correction 
+

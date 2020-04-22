@@ -2,7 +2,7 @@ import json
 import re
 from pprint import pprint
 
-with open('.\\examples\\03.json', 'rt', encoding='UTF8') as f:
+with open('.\\examples\\02.json', 'rt', encoding='UTF8') as f:
     content = json.load(f)
 
 min_font_sizes = []
@@ -29,13 +29,38 @@ pprint(texts)
 # 품목, 날짜
 r_items = r'[\d]+[.,][\d]*'
 r_date = r'[\d]+[/:][\d]*'
-for text in texts:
+# r_test_1 = r'^\s*(\d+)\s+(.*\S)\s+'
+title = ''
+items = []
+date = []
+for idx, text in enumerate(texts):
+    if idx == 0:
+        title = ' '.join(text)
     if any(re.search(r_items, t) for t in text):
-        print(text)
-    elif any(re.search(r_date, t) for t in text):
-        print(text)
+        items.append(' '.join(text))
+    if any(re.search(r_date, t) for t in text):
+        date.append(' '.join(text))
+    # if any(re.search(r_test_1, t) for t in text):
+    #     print(text)
 
-# 업소이름, 주소, 전화번호
+print(title)
+pprint(items)
+pprint(date)
+
+'''
+수량 품목 화폐단위 가격 
+수량 품목 가격 화폐단위 
+품목 수량 화폐단위 가격 
+품목 수량 가격 화폐단위 
+'''
+
+'''
+1. 데이터 보정 
+2. NLP 데이터 파싱 
+3. 정규표현식 
+'''
+
+# 주소, 전화번호
 
 # Title Text
 
@@ -65,23 +90,3 @@ for text in texts:
 # texts.append(temp_texts)
 
 # pprint(texts)
-
-
-# for idx, c in enumerate(content['images'][0]['fields']):
-#     min_x = min(map(lambda x: x['x'], c['boundingPoly']['vertices']))
-#     max_x_1 = max(map(lambda x: x['x'], content['images'][0]
-#                       ['fields'][idx-1]['boundingPoly']['vertices']))
-#     if max_x_1 >= min_x and idx != 0:
-#         print(content['images'][0]['fields'][idx-1]['inferText'])
-#         print(c['inferText'])
-
-
-# for idx, c in enumerate(content['images'][0]['fields']):
-#     # pprint(c)
-#     pprint(c['boundingPoly']['vertices'])
-#     print(max(map(lambda x: x['x'], c['boundingPoly']['vertices'])))
-#     print(min(map(lambda x: x['x'], c['boundingPoly']['vertices'])))
-#     # print(max(map(lambda x: x['x'], content['images'][0]
-#     #               ['fields'][idx-1]['boundingPoly']['vertices'])))
-#     print(max(map(lambda y: y['y'], c['boundingPoly']['vertices'])))
-#     # pprint(c['inferText'])

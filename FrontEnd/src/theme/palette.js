@@ -1,5 +1,4 @@
 import { colors } from '@material-ui/core';
-import moyocolor from '../api/moyoColor';
 
 const white = '#FFFFFF';
 const black = '#000000';

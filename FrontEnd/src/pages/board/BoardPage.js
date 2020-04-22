@@ -1,12 +1,9 @@
 import React from 'react';
-import HeaderBar from '../../components/common/HeaderBar';
+import Styled from 'styled-components';
+import MainLayout from '../../layouts/MainLayout';
 
 const BoardPage = () => {
-  return (
-    <>
-      <HeaderBar title="Board Main Page" />
-    </>
-  );
+  return <MainLayout>hello, board!</MainLayout>;
 };
 
 export default BoardPage;

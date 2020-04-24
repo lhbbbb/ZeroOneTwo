@@ -2,7 +2,7 @@ import json
 import re
 from pprint import pprint
 
-with open('.\\examples\\03.json', 'rt', encoding='UTF8') as f:
+with open('.\\japan_examples\\03.json', 'rt', encoding='UTF8') as f:
     content = json.load(f)
 
 min_font_sizes = []
@@ -12,6 +12,7 @@ for c in content['images'][0]['fields']:
     min_font_sizes.append(temp_font_size)
 min_font_size = min(min_font_sizes)
 
+# 한 줄 만들기
 texts = []
 temp_texts = []
 temp_y = 0
@@ -20,7 +21,10 @@ for c in content['images'][0]['fields']:
     if abs(temp_y - max_y) > min_font_size and temp_texts != []:
         texts.append(temp_texts)
         temp_texts = []
-    temp_texts.append(c['inferText'])
+    temp_max = max(list(map(lambda x: x['x'], c['boundingPoly']['vertices'])))
+    temp_min = min(list(map(lambda x: x['x'], c['boundingPoly']['vertices'])))
+    temp_texts.append(
+        {'text': c['inferText'], 'min': temp_min, 'max': temp_max})
     temp_y = max_y
 texts.append(temp_texts)
 pprint(texts)
@@ -34,32 +38,43 @@ r_dollar = r'[$]'
 # |WET TOTAL(NET TOTAL) 은 일단 제외
 r_total = r'^TOTAL|GRAND TOTAL|^TOTAAL'
 r_int = r'[\d]+'
-r_filters = r'TOTAL|SERVICE|CHANGE|MANAGER|^[\d.,\s]*$'
+r_filters = r'TOTAL|SERVICE|CHANGE|MANAGER|BALANCE|TAX|TOTAAL|ROUNDING|TIP|^[\d.,\s]*$'
 # r_total = r'(?=(?!(SUB)).*)(?=((TOTAL))).*'
 # r_total = r'(?(?=(SUB))[^SUB]|.*)TOTAL'
 # r_total = r'(S|[^S].|SU|S[^U].|SUB|SU[^B])\sTOTAL'
 # r_total = r'(?!(SUB))\b(TOTAL)'
+
+temp_max = 0
+temp_min = 0
+temp_items = []
 title = ''
 items = []
 date = []
 for idx, text in enumerate(texts):
+    text_list = list(map(lambda x: x['text'], text))
     if idx == 0:
-        title = ' '.join(text)
-    if any(re.search(r_items, t.upper()) for t in text):
-        items.append(' '.join(text))
-    if any(re.search(r_date, t) for t in text):
-        date.append(' '.join(text))
+        title = ' '.join(text_list)
+    # x min max 를 이용해 품목인지 확인
+    if any(re.search(r_items, t.upper()) for t in text_list):
+        new_max = max(list(map(lambda x: x['max'], text)))
+        new_min = min(list(map(lambda x: x['min'], text)))
+        if abs(temp_max - new_max) > 2 and abs(temp_min - new_min) > 2:
+            items.append(temp_items)
+            temp_items = [' '.join(text_list)]
+        else:
+            temp_items.append(' '.join(text_list))
+        temp_max, temp_min = new_max, new_min
+        # items.append(' '.join(text_list))
+    if any(re.search(r_date, t) for t in text_list):
+        date.append(' '.join(text_list))
+items.append(temp_items)
 
 print(title)
 pprint(items)
 pprint(date)
 
-# Total, TOTAL. Grand Total, Amount Due, Amount Paid
-# Total Due
-# Sub-Total
-# Total Owed
-
-for i in items:
+# Total, TOTAL. Grand Total // Amount Due, Amount Paid, Total Due, Total Owed
+for i in sum(items, []):
     if re.search(r_total, i.upper()):
         total_strs = re.findall(r_int, i)
         total_str = ''
@@ -68,18 +83,38 @@ for i in items:
                 total_str += f'.{s}'
             else:
                 total_str += s
-    elif re.search(r_filters, i.upper()):
+
+r_price = r'[\d.,\s]*$'
+individual_items = list(filter(lambda x: len(x) == max(
+    map(lambda y: len(y), items)), items))
+results = []
+for i in individual_items[0]:
+    if re.search(r_filters, i.upper()):
         continue
     else:
         print(i)
-        price_strs = re.findall(r_int, i)
-        price_str = ''
-        for idx, s in enumerate(price_strs):
-            if idx == len(price_strs) - 1 and len(price_strs) != 1 and len(s) == 2:
-                price_str += f'.{s}'
-            else:
-                price_str += s
-        print(price_str)
+        # price_strs = re.findall(r_int, i)
+        # price_str = ''
+        # for idx, s in enumerate(price_strs):
+        #     if idx == len(price_strs) - 1 and len(price_strs) != 1 and len(s) == 2:
+        #         price_str += f'.{s}'
+        #     else:
+        #         price_str += s
+        # print(price_str)
+        r_usd = re.compile(r'(USD)$')
+        j = r_usd.sub('', i)
+        price = re.findall(r_price, j)
+        price_org = ''.join(price)
+        price_str = price_org.replace(' ', '')
+        if price_str[-3] in [',', '.']:
+            price_str = price_str.replace(',', '').replace('.', '')
+            price_str = price_str[:-2] + '.' + price_str[-2:]
+        else:
+            price_str = price_str.replace(',', '').replace('.', '')
+        r_price_filter = re.compile(price_org + r'|€|£')
+        item = r_price_filter.sub('', j)
+        results.append({'item': item, 'price': price_str})
+pprint(results)
 
 
 '''
@@ -92,41 +127,8 @@ for i in items:
 '''
 1. 데이터 보정 
 2. NLP 데이터 파싱 
-3. 정규표현식 
-'''
-
-'''
-US : $, '' // S, USD 
-JP : 
+3. 특성에 따른 군집화 이후 처리 
+4. 정규표현식 
 '''
 
 # 주소, 전화번호
-
-# Title Text
-
-# texts = []
-# temp_texts = []
-# temp_text = ''
-# temp_y = 0
-# for idx, c in enumerate(content['images'][0]['fields']):
-#     max_y = max(map(lambda y: y['y'], c['boundingPoly']['vertices']))
-#     min_x = min(map(lambda x: x['x'], c['boundingPoly']['vertices']))
-#     max_x_1 = max(map(lambda x: x['x'], content['images'][0]
-#                       ['fields'][idx-1]['boundingPoly']['vertices']))
-
-#     if abs(temp_y - max_y) > min_font_size and temp_texts != []:
-#         temp_texts.append(temp_text)
-#         texts.append(temp_texts)
-#         temp_texts = []
-#         temp_text = ''
-
-#     if max_x_1 >= min_x and idx != 0:
-#         temp_text += c['inferText']
-#     else:
-#         temp_texts.append(temp_text)
-#         temp_text = c['inferText']
-#     temp_y = max_y
-# temp_texts.append(temp_text)
-# texts.append(temp_texts)
-
-# pprint(texts)

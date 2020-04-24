@@ -147,3 +147,6 @@ sketch
 
 # dataset raw image
 Models/image/datasets/raw
+
+# NMT model params
+*.params

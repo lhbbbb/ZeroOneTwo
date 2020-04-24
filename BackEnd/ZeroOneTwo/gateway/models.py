@@ -1,10 +1,3 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
 
@@ -25,12 +18,13 @@ class Boards(models.Model):
     description = models.TextField(blank=True, null=True)
     register = models.ForeignKey('User', models.DO_NOTHING, db_column='register')
     regdate = models.DateTimeField()
-    updater = models.ForeignKey('User', models.DO_NOTHING, db_column='updater', blank=True, null=True)
-    updated = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'Boards'
+        
+    def __str__(self):
+        return self.title
 
 
 class Items(models.Model):
@@ -44,6 +38,9 @@ class Items(models.Model):
     class Meta:
         managed = False
         db_table = 'Items'
+        
+    def __str__(self):
+        return self.origin_name
 
 
 class Rate(models.Model):
@@ -55,8 +52,6 @@ class Rate(models.Model):
     way = models.CharField(max_length=20, blank=True, null=True)
     register = models.ForeignKey('User', models.DO_NOTHING, db_column='register')
     regdate = models.DateTimeField()
-    updater = models.ForeignKey('User', models.DO_NOTHING, db_column='updater')
-    updated = models.DateTimeField()
 
     class Meta:
         managed = False
@@ -71,8 +66,6 @@ class Receipts(models.Model):
     telephone = models.CharField(max_length=30, blank=True, null=True)
     register = models.ForeignKey('User', models.DO_NOTHING, db_column='register')
     regdate = models.DateTimeField()
-    updater = models.ForeignKey('User', models.DO_NOTHING, db_column='updater', blank=True, null=True)
-    updated = models.DateTimeField(blank=True, null=True)
     board = models.ForeignKey(Boards, models.DO_NOTHING)
     country = models.CharField(max_length=50, blank=True, null=True)
     currency = models.CharField(max_length=20, blank=True, null=True)
@@ -81,6 +74,9 @@ class Receipts(models.Model):
     class Meta:
         managed = False
         db_table = 'Receipts'
+        
+    def __str__(self):
+        return self.place
 
 
 class User(models.Model):
@@ -94,12 +90,16 @@ class User(models.Model):
     class Meta:
         managed = False
         db_table = 'User'
-
+        
+    def __str__(self):
+        return self.nickname
 
 
 '''
-Belows are auto generated with Django.
+Below is django based Model
 '''
+
+
 
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)

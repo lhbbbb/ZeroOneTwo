@@ -13,6 +13,6 @@ router.register('Rate', views.RateViewSet)
 urlpatterns = [
     path('', views.index, name='index'),
     path('api/', include(router.urls)),
-    path('test/<int:mx>/', views.exchange),
+    path('rate/<int:mx>/', views.exchange),
     # path('user/', views.)
 ]

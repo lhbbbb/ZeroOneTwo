@@ -149,4 +149,8 @@ sketch
 Models/image/datasets/raw
 
 # NMT model params
-*.params
+Models/test/*/*.params
+Models/test/*/*.dic
+Models/test/*/*.mdl
+Models/test/*/*.np
+Models/test/*/*.txt

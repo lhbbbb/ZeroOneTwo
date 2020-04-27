@@ -14,5 +14,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('api/', include(router.urls)),
     path('rate/<int:mx>/', views.exchange),
+    path('test/', views.test),
     # path('user/', views.)
 ]

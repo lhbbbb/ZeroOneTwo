@@ -2,7 +2,7 @@ import json
 import re
 from pprint import pprint
 
-with open('.\\examples\\01.json', 'rt', encoding='UTF8') as f:
+with open('.\\japan_examples\\05.json', 'rt', encoding='UTF8') as f:
     content = json.load(f)
 
 min_font_sizes = []
@@ -27,15 +27,14 @@ for c in content['images'][0]['fields']:
         {'text': c['inferText'], 'min': temp_min, 'max': temp_max})
     temp_y = max_y
 texts.append(temp_texts)
+pprint(texts)
 
 # 품목, 날짜
-r_items = r'[\d]+[.,][\d]*|TOTAL|TOTAAL'
+r_items = r'¥|TOTAL|合計'
 r_date = r'[\d]+[/:][\d]*'
-r_dollar = r'[$]'
-# |WET TOTAL(NET TOTAL) 은 일단 제외
-r_total = r'^TOTAL|GRAND TOTAL|^TOTAAL'
+r_total = r'^TOTAL|(合計)+[\s]+'
 r_int = r'[\d]+'
-r_filters = r'TOTAL|SERVICE|CHANGE|MANAGER|BALANCE|TAX|TOTAAL|ROUNDING|TIP|^[\d.,\s]*$'
+r_filters = r'合計|小計|小 計|お預り|お釣り|内税|象 計|TOTAL|SERVICE|CHANGE|TAX|^[\d.,\s]*$|[\d]+[)]$'
 
 temp_max = 0
 temp_min = 0
@@ -65,10 +64,14 @@ items.append(temp_items)
 result = {}
 result['title'] = title
 result['date'] = date[0] if date else ''
+print(title)
+pprint(items)
+pprint(date)
 
-# Total, TOTAL. Grand Total // Amount Due, Amount Paid, Total Due, Total Owed
+# Total
 total_str = ''
 for i in sum(items, []):
+    print(i)
     if re.search(r_total, i.upper()):
         total_strs = re.findall(r_int, i)
         for idx, s in enumerate(total_strs):
@@ -78,20 +81,31 @@ for i in sum(items, []):
                 total_str += s
 result['total'] = total_str
 
+new_items = []
+for i in items:
+    temp = []
+    for j in i:
+        if re.search(r_filters, j.upper()):
+            continue
+        else:
+            temp.append(j)
+    new_items.append(temp)
+
 r_price = r'[\d.,\s]*$'
 individual_items = list(filter(lambda x: len(x) == max(
-    map(lambda y: len(y), items)), items))
+    map(lambda y: len(y), new_items)), new_items))
 items_result = []
 for i in individual_items[0]:
     if re.search(r_filters, i.upper()):
         continue
     else:
-        r_usd = re.compile(r'(USD)$')
-        j = r_usd.sub('', i)
+        print(i)
+        r_yen = re.compile(r'(¥)')
+        j = r_yen.sub('', i)
         price = re.findall(r_price, j)
         price_org = ''.join(price)
         price_str = price_org.replace(' ', '')
-        if price_str[-3] in [',', '.']:
+        if len(price_str) >= 3 and price_str[-3] in [',', '.']:
             price_str = price_str.replace(',', '').replace('.', '')
             price_str = price_str[:-2] + '.' + price_str[-2:]
         else:
@@ -101,20 +115,3 @@ for i in individual_items[0]:
         items_result.append({'item': item, 'price': price_str})
 result['items'] = items_result
 pprint(result)
-
-
-'''
-수량 품목 화폐단위 가격 
-수량 품목 가격 화폐단위 
-품목 수량 화폐단위 가격 
-품목 수량 가격 화폐단위 
-'''
-
-'''
-1. 데이터 보정 
-2. NLP 데이터 파싱 
-3. 특성에 따른 군집화 이후 처리 
-4. 정규표현식 
-'''
-
-# 주소, 전화번호

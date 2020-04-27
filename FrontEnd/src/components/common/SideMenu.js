@@ -1,52 +1,106 @@
 import React from 'react';
-import styled from 'styled-components';
-import { useSelector, useDispatch } from 'react-redux';
-import Drawer from '@material-ui/core/Drawer';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import ListItem from '@material-ui/core/ListItem';
-import List from '@material-ui/core/List';
-import ListItemText from '@material-ui/core/ListItemText';
+import { useHistory } from 'react-router-dom';
+import styled, { css } from 'styled-components';
+import {
+  Drawer,
+  List,
+  Divider,
+  Button,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+} from '@material-ui/core';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import { closeDrawer } from '../../modules/drawer';
+import HomeIcon from '@material-ui/icons/Home';
+import DeveloperBoardIcon from '@material-ui/icons/DeveloperBoard';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 const StyledDrawer = styled(Drawer)`
-  flex-shrink: 0;
-  width: 240px;
-  paper {
-    width: 240px;
-  }
+  ${(props) => css`
+    width: ${props.drawerwidth}px;
+    flex-shrink: 0;
+    .MuiDrawer-paper {
+      width: ${props.drawerwidth}px;
+    }
+  `}
+`;
+const StyledButton = styled(Button)`
+  margin: 1rem !important;
+`;
+const StyledFooter = styled.footer`
+  margin: 1rem;
 `;
 
-const DrawerHeader = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  justify-content: flex-end;
-`;
-
-const SideMenu = () => {
-  const dispatch = useDispatch();
-  const open = useSelector((state) => state.drawer.isOpen);
-  const handleDrawerClose = () => dispatch(closeDrawer());
-  const menuList = ['내 보드, 분석 통계, 세팅'];
+const SideMenu = ({ drawerWidth, open, onDrawerClose }) => {
+  const history = useHistory();
+  const menuList = [
+    {
+      type: 'Main',
+      text: '메인페이지',
+      icon: <HomeIcon />,
+      link: '/main',
+    },
+    {
+      type: 'Board',
+      text: '클립보드',
+      icon: <DeveloperBoardIcon />,
+      link: '/board',
+    },
+    {
+      type: 'Setting',
+      text: '환경설정',
+      icon: <SettingsIcon />,
+      link: '/setting',
+    },
+  ];
+  const handleMenuSelect = (link) => {
+    history.push(link);
+  };
   return (
-    <StyledDrawer variant="persistent" anchor="left" open={open}>
-      <DrawerHeader>
-        <IconButton onClick={handleDrawerClose}>
-          <ChevronLeftIcon />
-        </IconButton>
-      </DrawerHeader>
-      <Divider />
-      <List>
-        {menuList.map((text) => (
-          <ListItem button key={text}>
-            <ListItemText primary={text} />
+    <StyledDrawer
+      variant="persistent"
+      anchor="left"
+      open={open}
+      drawerwidth={drawerWidth}
+    >
+      <StyledButton
+        variant="outlined"
+        size="large"
+        startIcon={<ChevronLeftIcon />}
+        onClick={onDrawerClose}
+      >
+        메뉴 닫기
+      </StyledButton>
+      <Divider variant="middle" />
+      <List style={{ flexGrow: 1 }}>
+        {menuList.map((menu) => (
+          <ListItem
+            button
+            key={menu.type}
+            onClick={() => handleMenuSelect(menu.link)}
+          >
+            <ListItemIcon>{menu.icon}</ListItemIcon>
+            <ListItemText primary={menu.text} />
           </ListItem>
         ))}
       </List>
-      <Divider />
+      <Divider variant="middle" />
+      <StyledFooter>
+        <Typography
+          variant="caption"
+          color="textSecondary"
+          paragraph
+          align="center"
+        >
+          Copyright 2020-2020 by
+          <br /> 'JisooHa and others'.
+          <br />
+          All Rights Reserved.
+          <br />
+          Powered by JisooHa.
+        </Typography>
+      </StyledFooter>
     </StyledDrawer>
   );
 };

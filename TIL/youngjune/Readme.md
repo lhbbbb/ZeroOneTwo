@@ -37,15 +37,17 @@ Setting: 여러 환경설정을 담당하는 페이지
 
 - react-router
 - redux
-- redux-saga
+- redux-saga (고려중...)
 - axios
 - material-ui
 
 **프론트 파일 구조**
 
 - assets: 이미지, 아이콘, css 등 외부 이미지 요소들
-- components: 페이지 내 들어갈 컴포넌트들(프레젠테이션/컨테이너로 구분해 개발할 예정)
+- components: 페이지 내 들어갈 프레젠테이션 컴포넌트들
+- containers: 페이지 내 들어갈 컨테이너 컴포넌트들
 - pages: 개발할 페이지들(또는 모달페이지)
+- layouts: 화면 틀
 - theme: material-ui 디자인 일괄 적용(아직은 미적용 상태)
 - modules: 리덕스 모듈들
 

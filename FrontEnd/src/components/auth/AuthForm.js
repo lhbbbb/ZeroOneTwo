@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Typography, TextField, Button } from '@material-ui/core';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 const AuthFormWrapper = styled.div``;
 const FooterBlock = styled.div`
@@ -26,6 +26,10 @@ const TitleText = {
 
 const AuthForm = ({ type, form, onChange, onSubmit }) => {
   const text = TitleText[type];
+  const history = useHistory();
+  const handleButtonClick = () => {
+    history.push('/main');
+  };
   return (
     <AuthFormWrapper>
       <Typography align="left" variant="h4">
@@ -56,7 +60,12 @@ const AuthForm = ({ type, form, onChange, onSubmit }) => {
             value={form.passwordConfirm}
           />
         )}
-        <Button variant="contained" size="medium" color="primary">
+        <Button
+          variant="contained"
+          size="medium"
+          color="primary"
+          onClick={handleButtonClick}
+        >
           {text}
         </Button>
       </FormBlock>

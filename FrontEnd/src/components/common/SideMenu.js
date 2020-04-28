@@ -36,22 +36,10 @@ const SideMenu = ({ drawerWidth, open, onDrawerClose }) => {
   const history = useHistory();
   const menuList = [
     {
-      type: 'Main',
-      text: '메인페이지',
-      icon: <HomeIcon />,
-      link: '/main',
-    },
-    {
       type: 'Board',
       text: '클립보드',
       icon: <DeveloperBoardIcon />,
       link: '/board',
-    },
-    {
-      type: 'Setting',
-      text: '환경설정',
-      icon: <SettingsIcon />,
-      link: '/setting',
     },
   ];
   const handleMenuSelect = (link) => {

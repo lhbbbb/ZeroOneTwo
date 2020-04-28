@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import InsertDialog from '../../containers/board/InsertDialog';
-import MainLayout from '../../layouts/MainLayout';
+import BoardLayout from '../../layouts/BoardLayout';
 import {
   Typography,
   Grid,
@@ -103,7 +103,7 @@ const BoardPage = () => {
   };
   return (
     <>
-      <MainLayout title={'Board'}>
+      <BoardLayout title="클립보드">
         <Grid container>
           <ButtonGrid container justify="flex-end">
             <Button
@@ -153,7 +153,7 @@ const BoardPage = () => {
             ))}
           </Grid>
         </Grid>
-      </MainLayout>
+      </BoardLayout>
       <InsertDialog open={dialogOpen} onClose={handleDialogClose} />
     </>
   );

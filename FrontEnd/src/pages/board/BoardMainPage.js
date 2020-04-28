@@ -12,7 +12,7 @@ import {
   Button,
   Grid,
 } from '@material-ui/core';
-import MainLayout from '../../layouts/MainLayout';
+import BoardLayout from '../../layouts/BoardLayout';
 import ReceiptDialog from '../../containers/receipt/InsertDialog';
 
 const TempData = {
@@ -86,7 +86,7 @@ const BoardMainPage = () => {
   };
 
   return (
-    <MainLayout title={'BoardMain'}>
+    <BoardLayout title={'BoardMain'}>
       <Grid container justify="flex-end">
         <Button
           variant="contained"
@@ -125,7 +125,7 @@ const BoardMainPage = () => {
         open={receiptDialogOpen}
         onClose={handleReceiptInsertClose}
       />
-    </MainLayout>
+    </BoardLayout>
   );
 };
 

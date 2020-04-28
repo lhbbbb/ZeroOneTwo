@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import ReceiptBackground from '../assets/two.jpg';
 
 const AuthLayoutWrapper = styled.div`
   display: flex;
@@ -12,6 +13,8 @@ const AuthLayoutWrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background: url(${ReceiptBackground}) no-repeat center center;
+  background-size: cover;
 `;
 const WhiteBlock = styled.div`
   .logo-area {
@@ -26,11 +29,19 @@ const WhiteBlock = styled.div`
   width: 360px;
   background: white;
   border-radius: 2px;
+  z-index: 1000;
+`;
+const ToneBlock = styled.div`
+  background-color: rgba(0, 0, 0, 0.6);
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
 `;
 
 const AuthLayout = ({ children }) => {
   return (
     <AuthLayoutWrapper>
+      <ToneBlock />
       <WhiteBlock>
         <div className="logo-area">
           <Link to="/">ZERO-ONE-TWO</Link>

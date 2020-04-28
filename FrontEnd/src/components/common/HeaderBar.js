@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled, { css } from 'styled-components';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+} from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
@@ -24,7 +28,21 @@ const StyledAppBar = styled(AppBar)`
     `};
 `;
 
-const HeaderBar = ({ drawerWidth, open, onDrawerOpen, title }) => {
+const HeaderBar = ({
+  drawerWidth,
+  open,
+  onDrawerOpen,
+  title,
+  onLogoutClick,
+}) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const menuOpen = Boolean(anchorEl);
+  const handleMenu = (e) => {
+    setAnchorEl(e.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   return (
     <>
       <StyledAppBar position="sticky" open={open} drawerwidth={drawerWidth}>
@@ -43,9 +61,25 @@ const HeaderBar = ({ drawerWidth, open, onDrawerOpen, title }) => {
             {title}
           </FullSizeTypo>
 
-          <IconButton color="inherit" edge="end">
+          <IconButton color="inherit" edge="end" onClick={handleMenu}>
             <AccountCircleIcon />
           </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={menuOpen}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={onLogoutClick}>로그아웃</MenuItem>
+          </Menu>
         </Toolbar>
       </StyledAppBar>
     </>

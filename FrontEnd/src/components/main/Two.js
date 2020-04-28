@@ -1,40 +1,39 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import TwoImage from '../../assets/two.jpg';
 import { withStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
 import { Typography, Button } from '@material-ui/core';
 
-// import imgZero from '../../assets/zero.jpg'
-
-const imgTwo = require('../../assets/two.jpg');
-
 const TwoWrapper = styled.div`
-  text-align: center;
+  width: inherit;
+  height: inherit;
+  background: url(${TwoImage}) no-repeat center center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+const ToneBlock = styled.div`
+  background-color: rgba(0, 0, 0, 0.6);
+  width: inherit;
+  height: inherit;
+  position: absolute;
+`;
+const UpperTypo = styled(Typography)`
+  z-index: 1001;
+  font-weight: 700;
+  color: white !important;
+  & + .MuiTypography-h5 {
+    margin-top: 2rem;
+  }
 `;
 
 const styles = (theme) => ({
-  img: {
-    display: 'block',
-    marginBottom: '4rem',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    maxWidth: '100%',
-    height: 'auto',
-  },
   button: {
     marginTop: theme.spacing(2),
     minWidth: 200,
     textAlign: 'center',
-  },
-  h5: {
-    marginBottom: theme.spacing(4),
-    marginTop: theme.spacing(4),
-    [theme.breakpoints.up('sm')]: {
-      marginTop: theme.spacing(10),
-    },
-  },
-  more: {
-    marginTop: theme.spacing(2),
   },
 });
 
@@ -43,13 +42,13 @@ const Two = (props) => {
 
   return (
     <TwoWrapper>
-      <img src={imgTwo} alt="imgZero" className={classes.img}/>
-      <Typography color="inherit" align="center" variant="h2" marked="center">
+      <ToneBlock />
+      <UpperTypo align="center" variant="h2">
         이(2)곳에
-      </Typography>
-      <Typography color="inherit" align="center" variant="h5" className={classes.h5}>
+      </UpperTypo>
+      <UpperTypo align="center" variant="h5">
         영수증 데이터를 모아서 보여줘요
-      </Typography>
+      </UpperTypo>
       <Button
         color="secondary"
         variant="contained"
@@ -57,16 +56,12 @@ const Two = (props) => {
         className={classes.button}
         align="center"
         component="a"
-        href="/"
+        href="/login"
       >
-        GET STARTED
+        시작하기
       </Button>
     </TwoWrapper>
-  )
-}
-
-Two.propTypes = {
-  classes: PropTypes.object.isRequired,
+  );
 };
 
 export default withStyles(styles)(Two);

@@ -28,7 +28,11 @@ const AuthForm = ({ type, form, onChange, onSubmit }) => {
   const text = TitleText[type];
   const history = useHistory();
   const handleButtonClick = () => {
-    history.push('/main');
+    if (type === 'login') {
+      history.push('/board');
+    } else {
+      history.push('/login');
+    }
   };
   return (
     <AuthFormWrapper>

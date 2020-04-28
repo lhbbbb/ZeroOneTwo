@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import MainLayout from '../../layouts/MainLayout';
+import BoardLayout from '../../layouts/BoardLayout';
 import {
   Grid,
   Typography,
-  TextField,
   Button,
   Card,
   CardContent,
@@ -70,7 +69,7 @@ const ReceiptInsertPage = () => {
   };
 
   return (
-    <MainLayout title="영수증 추가">
+    <BoardLayout title="영수증 추가">
       <InsertWrapper>
         <Grid container>
           <Grid container item xs={3}>
@@ -129,7 +128,7 @@ const ReceiptInsertPage = () => {
           전송
         </Button>
       </InsertWrapper>
-    </MainLayout>
+    </BoardLayout>
   );
 };
 

@@ -8,14 +8,18 @@ from decouple import config
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 
-
-
 import urllib.request
 import requests
 import json
 import datetime
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, generics
 
+
+from IPython import embed
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer
@@ -38,6 +42,32 @@ class RateViewSet(viewsets.ModelViewSet):
     queryset = Rate.objects.all()
 
 
+class BoardsDataView(generics.GenericAPIView):
+    serializer_class = BoardsModelSerializer
+    # permission_classes = [IsAuthenticated,] # 인증
+    queryset = ''
+
+    def get(self, request, format=None):
+        try:
+            boards = User.objects.get(pk=request.user.pk).boards.all()
+        except:
+            return JsonResponse({'error':'No user'})
+        serializer = BoardsModelSerializer(boards, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        data = request.data
+        data['register'] = request.user.pk
+        embed()
+        serializer = BoardsModelSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 # 등록
 def make_user(request):
     import IPython
@@ -46,8 +76,11 @@ def make_user(request):
     pass
 
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def test(request):
+    obj = Boards.objects.get(user_id=request.user.pk)
+    # if request.method == 'POST':
+    #     Boards.objects.create()
     try:
         file = request.FILES['image']
     except:
@@ -56,13 +89,18 @@ def test(request):
     # 파일 이름 수정하는 로직을 작성하자.
     file.name = 'test.jpg'
     default_storage.save(file.name, file)
+    
     data = {'result':'사진이 저장되었습니다.'}
     
     # 
     return JsonResponse(data)
 
 
+@api_view(['GET'])
 def index(request):
+    '''
+    This is an index page.
+    '''
     return HttpResponse('hello')
 
 

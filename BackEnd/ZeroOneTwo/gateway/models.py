@@ -23,7 +23,7 @@ class Boards(models.Model):
     enddate = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     register = models.ForeignKey('User', models.DO_NOTHING, db_column='register', related_name='board_register')
-    regdate = models.DateTimeField()
+    regdate = models.DateTimeField(auto_now_add=True)
     entry = models.ManyToManyField(User, related_name='boards')
 
     def __str__(self):

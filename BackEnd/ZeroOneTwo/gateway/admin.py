@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import User, Boards, Receipts, Items, Rate
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'nickname', 'active', 'regdate', 'sleepdate', 'withdrawdate', )
+    list_display = ('user_id', 'username', 'active', 'regdate', 'sleepdate', 'withdrawdate', )
     
 class BoardsAdmin(admin.ModelAdmin):
     list_display = ('board_id', 'title', 'startdate', 'enddate', 'description', 'register', 'regdate', )

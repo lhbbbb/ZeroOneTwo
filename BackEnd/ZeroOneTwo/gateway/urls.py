@@ -14,8 +14,9 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('api/', include(router.urls)),
     path('rate/<int:mx>/', views.exchange),
-    path('test/', views.test),
     
+    # path(r'^test/', views.test), # 이미지 생성
+    path('boards/', views.BoardsDataView.as_view()),
     
     ### 등록
     # 로그인 및 회원가입. 

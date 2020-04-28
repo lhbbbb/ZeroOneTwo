@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import InsertDialog from '../../containers/board/InsertDialog';
 import MainLayout from '../../layouts/MainLayout';
 import {
   Typography,
@@ -90,56 +91,71 @@ const TempData = [
 
 const BoardPage = () => {
   const history = useHistory();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const handleDialogOpen = () => {
+    setDialogOpen(true);
+  };
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
   const handleBoardClick = (id) => {
     history.push(`/board/${id}`);
   };
   return (
-    <MainLayout title={'Board'}>
-      <Grid container>
-        <ButtonGrid container justify="flex-end">
-          <Button variant="contained" color="primary" disableElevation>
-            보드 추가하기
-          </Button>
-        </ButtonGrid>
+    <>
+      <MainLayout title={'Board'}>
         <Grid container>
-          {TempData.map((data) => (
-            <StyledCard key={data.boardId}>
-              <CardActionArea onClick={() => handleBoardClick(data.boardId)}>
-                <CardContent>
-                  <Typography variant="h5">{data.title}</Typography>
-                  <Typography
-                    variant="body1"
-                    color="textSecondary"
-                    style={{ padding: '0.5rem 0' }}
-                  >
-                    {data.description}
-                  </Typography>
-                  <Typography variant="body2" align="left">
-                    작성자: {data.writer}
-                  </Typography>
-                  <Typography variant="body2" align="left">
-                    진행일자: {data.startDate} ~ {data.endDate}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-              <Divider variant="middle"></Divider>
-              <AvatarBlock>
-                {data.participants.map((participant) => (
-                  <Avatar
-                    key={participant.username}
-                    alt={participant.username}
-                    src={participant.url}
-                  />
-                ))}
-                <InnerTypo variant="body2" align="center" display="block">
-                  님과 함께 공유중입니다.
-                </InnerTypo>
-              </AvatarBlock>
-            </StyledCard>
-          ))}
+          <ButtonGrid container justify="flex-end">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleDialogOpen}
+              disableElevation
+            >
+              보드 추가하기
+            </Button>
+          </ButtonGrid>
+          <Grid container>
+            {TempData.map((data) => (
+              <StyledCard key={data.boardId}>
+                <CardActionArea onClick={() => handleBoardClick(data.boardId)}>
+                  <CardContent>
+                    <Typography variant="h5">{data.title}</Typography>
+                    <Typography
+                      variant="body1"
+                      color="textSecondary"
+                      style={{ padding: '0.5rem 0' }}
+                    >
+                      {data.description}
+                    </Typography>
+                    <Typography variant="body2" align="left">
+                      작성자: {data.writer}
+                    </Typography>
+                    <Typography variant="body2" align="left">
+                      진행일자: {data.startDate} ~ {data.endDate}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+                <Divider variant="middle"></Divider>
+                <AvatarBlock>
+                  {data.participants.map((participant) => (
+                    <Avatar
+                      key={participant.username}
+                      alt={participant.username}
+                      src={participant.url}
+                    />
+                  ))}
+                  <InnerTypo variant="body2" align="center" display="block">
+                    님과 함께 공유중입니다.
+                  </InnerTypo>
+                </AvatarBlock>
+              </StyledCard>
+            ))}
+          </Grid>
         </Grid>
-      </Grid>
-    </MainLayout>
+      </MainLayout>
+      <InsertDialog open={dialogOpen} onClose={handleDialogClose} />
+    </>
   );
 };
 

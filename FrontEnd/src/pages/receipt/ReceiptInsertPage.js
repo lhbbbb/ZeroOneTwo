@@ -17,10 +17,7 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-const PreviewImage = styled.img`
-  width: inherit;
-  height: 20vh;
-`;
+
 const InsertWrapper = styled.div`
   background: white;
   padding: 1rem;
@@ -42,9 +39,6 @@ const TitleCardContent = styled(CardContent)`
 `;
 const ReceiptInsertPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [storeName, setStoreName] = useState('');
-  const [country, setCountry] = useState('');
-  const [address, setAddress] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -74,6 +68,7 @@ const ReceiptInsertPage = () => {
     //   alert('실패')
     // })
   };
+
   return (
     <MainLayout title="영수증 추가">
       <InsertWrapper>
@@ -89,45 +84,6 @@ const ReceiptInsertPage = () => {
                 onChange={handleDateChange}
               />
             </MuiPickersUtilsProvider>
-          </Grid>
-
-          <Grid container item xs={3}>
-            <Typography variant="h6">업소이름:</Typography>
-          </Grid>
-          <Grid container item xs={9}>
-            <TextField
-              id="insertStoreName"
-              value={storeName}
-              onChange={(e) => {
-                setStoreName(e.target.value);
-              }}
-            />
-          </Grid>
-
-          <Grid container item xs={3}>
-            <Typography variant="h6">주소:</Typography>
-          </Grid>
-          <Grid container item xs={9}>
-            <TextField
-              id="insertAddress"
-              value={address}
-              onChange={(e) => {
-                setAddress(e.target.value);
-              }}
-            />
-          </Grid>
-
-          <Grid container item xs={3}>
-            <Typography variant="h6">나라:</Typography>
-          </Grid>
-          <Grid container item xs={9}>
-            <TextField
-              id="insertCountry"
-              value={country}
-              onChange={(e) => {
-                setCountry(e.target.value);
-              }}
-            />
           </Grid>
           <Grid container item xs={3}>
             <Typography variant="h6">이미지</Typography>

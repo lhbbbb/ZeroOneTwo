@@ -90,8 +90,7 @@ def test(request):
     file.name = 'test.jpg'
     default_storage.save(file.name, file)
     
-    data = {'result':'사진이 저장되었습니다.'}
-    
+    data = {'result':'사진이 저장되었습니다.'}    
     # 
     return JsonResponse(data)
 

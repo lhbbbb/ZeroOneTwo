@@ -1,31 +1,30 @@
 from rest_framework import serializers
 from .models import User, Boards, Receipts, Items, Rate
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+
+# ModelSerializer
+
+class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
 
-class BoardsSerializer(serializers.HyperlinkedModelSerializer):
+class BoardsModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Boards
         fields = '__all__'
 
-class ReceiptsSerializer(serializers.HyperlinkedModelSerializer):
+class ReceiptsModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Receipts
         fields = '__all__'
 
-
-class ItemsSerializer(serializers.HyperlinkedModelSerializer):
+class ItemsModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Items
         fields = '__all__'
         
-class RateSerializer(serializers.HyperlinkedModelSerializer):
+class RateModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rate
         fields = '__all__'
-        
-
-

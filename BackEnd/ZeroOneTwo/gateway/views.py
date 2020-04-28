@@ -1,12 +1,13 @@
 from django.shortcuts import render, HttpResponse
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login
 from django.http import JsonResponse  
 from rest_framework import viewsets
 from .serializers import *
 from .models import User, Boards, Receipts, Items, Rate
 from decouple import config
 from django.views.decorators.csrf import csrf_exempt
-from .forms import ReceiptsFormModel
+from django.core.files.storage import default_storage
+
 
 
 import urllib.request
@@ -15,39 +16,62 @@ import json
 import datetime
 
 
+
 class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = UserSerializer
+    serializer_class = UserModelSerializer
     queryset = User.objects.all()
 
 class BoardsViewSet(viewsets.ModelViewSet):
-    serializer_class = BoardsSerializer
+    serializer_class = BoardsModelSerializer
     queryset = Boards.objects.all()
 
 class ReceiptsViewSet(viewsets.ModelViewSet):
-    serializer_class = ReceiptsSerializer
+    serializer_class = ReceiptsModelSerializer
     queryset = Receipts.objects.all()
 
 class ItemsViewSet(viewsets.ModelViewSet):
-    serializer_class = ItemsSerializer
+    serializer_class = ItemsModelSerializer
     queryset = Items.objects.all()
 
 class RateViewSet(viewsets.ModelViewSet):
-    serializer_class = RateSerializer
+    serializer_class = RateModelSerializer
     queryset = Rate.objects.all()
+
+
+# 등록
+def make_user(request):
+    import IPython
+    IPython.embed()
+    
+    pass
 
 
 @csrf_exempt
 def test(request):
-    image_file = request.FILES['image']
-    form = ReceiptsFormModel(request.POST, request.FILES, instance=Receipts)
-    import IPython
-    IPython.embed()
-    data = {'data':'hello'}
+    try:
+        file = request.FILES['image']
+    except:
+        data = {'result':'사진을 넣어주세요.'}
+        return JsonResponse(data)
+    # 파일 이름 수정하는 로직을 작성하자.
+    file.name = 'test.jpg'
+    default_storage.save(file.name, file)
+    data = {'result':'사진이 저장되었습니다.'}
+    
+    # 
     return JsonResponse(data)
 
 
 def index(request):
     return HttpResponse('hello')
+
+
+
+
+
+
+
+
 
 
 def exchange(request, mx):
@@ -83,13 +107,14 @@ def exchange(request, mx):
             }
             # 'USD', CNH, JPY(100) / 2015년 이전 중국 위안화는 CNY
             for info in exchange:
-                if info['cur_unit'] == 'USD':
+                cur_unit = info['cur_unit']
+                if cur_unit == 'USD':
                     new_obj_ttb['usa'] = info['ttb'].replace(",",'')
                     new_obj_tts['usa'] = info['tts'].replace(",",'')
-                elif info['cur_unit'] == 'CNY':
+                elif cur_unit == 'CNY' or cur_unit ==  'CNH':
                     new_obj_ttb['cha'] = info['ttb'].replace(",",'')
                     new_obj_tts['cha'] = info['tts'].replace(",",'')
-                elif info['cur_unit'] == 'JPY(100)':
+                elif cur_unit == 'JPY(100)':
                     new_obj_ttb['jpa'] = info['ttb'].replace(",",'')
                     new_obj_tts['jpa'] = info['tts'].replace(",",'')
             ttb_unit = Rate.objects.create(

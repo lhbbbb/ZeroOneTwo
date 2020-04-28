@@ -3,13 +3,17 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
 
-# class BoardUser(models.Model):
-#     board = models.ForeignKey('Boards', models.DO_NOTHING)
-#     user = models.ForeignKey('User', models.DO_NOTHING)
+class User(AbstractUser):
+    user_id = models.AutoField(primary_key=True)
+    nickname = models.CharField(max_length=20, blank=True, null=True)
+    active = models.IntegerField(default=1)
+    regdate = models.DateTimeField(auto_now_add=True)
+    sleepdate = models.DateTimeField(blank=True, null=True)
+    withdrawdate = models.DateTimeField(blank=True, null=True)
+    custom_password = models.CharField(max_length=50, blank=True, null=True)
 
-#     class Meta:
-#         managed = False
-#         db_table = 'Board_User'
+    def __str__(self):
+        return self.username
 
 
 class Boards(models.Model):
@@ -18,9 +22,10 @@ class Boards(models.Model):
     startdate = models.DateField(blank=True, null=True)
     enddate = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    register = models.ForeignKey('User', models.DO_NOTHING, db_column='register')
+    register = models.ForeignKey('User', models.DO_NOTHING, db_column='register', related_name='board_register')
     regdate = models.DateTimeField()
-        
+    entry = models.ManyToManyField(User, related_name='boards')
+
     def __str__(self):
         return self.title
 
@@ -32,7 +37,7 @@ class Items(models.Model):
     trans_name = models.CharField(max_length=50, blank=True, null=True)
     price = models.FloatField(blank=True, null=True)
     units = models.IntegerField(blank=True, null=True)
-        
+
     def __str__(self):
         return self.origin_name
 
@@ -59,19 +64,7 @@ class Receipts(models.Model):
     board = models.ForeignKey(Boards, models.DO_NOTHING)
     country = models.CharField(max_length=50, blank=True, null=True)
     currency = models.CharField(max_length=20, blank=True, null=True)
-    image = models.ImageField(blank=True, null=True, upload_to='images/')
+    image = models.ImageField(blank=True, null=True, upload_to='images')
 
     def __str__(self):
         return self.place
-
-
-class User(AbstractUser):
-    user_id = models.AutoField(primary_key=True)
-    nickname = models.CharField(max_length=20, blank=True, null=True)
-    active = models.IntegerField(default=1)
-    regdate = models.DateTimeField(auto_now_add=True)
-    sleepdate = models.DateTimeField(blank=True, null=True)
-    withdrawdate = models.DateTimeField(blank=True, null=True)
-        
-    def __str__(self):
-        return self.nickname

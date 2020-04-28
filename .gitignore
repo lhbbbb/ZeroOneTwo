@@ -146,6 +146,7 @@ sketch
 .vscode
 
 # dataset raw image
+images/
 Models/image/datasets/raw
 
 # NMT model params

@@ -13,6 +13,7 @@ import {
   Grid,
 } from '@material-ui/core';
 import MainLayout from '../../layouts/MainLayout';
+import ReceiptDialog from '../../containers/receipt/InsertDialog';
 
 const TempData = {
   boardId: 1,
@@ -59,8 +60,8 @@ const TempData = {
 
 const BoardMainPage = () => {
   const history = useHistory();
-  const [value, setValue] = useState(0);
-  useEffect(() => {}, []);
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  const [tabIndex, setTabIndex] = useState(0);
 
   const getBetweenDates = (startDate, endDate) => {
     var currDate = moment(startDate).startOf('day');
@@ -75,10 +76,13 @@ const BoardMainPage = () => {
   const dateArray = getBetweenDates(TempData.startDate, TempData.endDate);
 
   const handleTabChange = (e, newValue) => {
-    setValue(newValue);
+    setTabIndex(newValue);
   };
-  const handleButtonClick = () => {
-    history.push(`/board/${TempData.boardId}/insert`);
+  const handleReceiptInsertOpen = () => {
+    setReceiptDialogOpen(true);
+  };
+  const handleReceiptInsertClose = () => {
+    setReceiptDialogOpen(false);
   };
 
   return (
@@ -87,10 +91,9 @@ const BoardMainPage = () => {
         <Button
           variant="contained"
           color="primary"
-          align="right"
-          onClick={handleButtonClick}
+          onClick={handleReceiptInsertOpen}
         >
-          영수증 추가
+          영수중 추가(다이얼로그)
         </Button>
       </Grid>
 
@@ -106,7 +109,7 @@ const BoardMainPage = () => {
       <Typography variant="body1">공유하는 사람 리스트</Typography>
       <Divider />
       <Tabs
-        value={value}
+        value={tabIndex}
         onChange={handleTabChange}
         indicatorColor="primary"
         textColor="primary"
@@ -117,7 +120,11 @@ const BoardMainPage = () => {
           <Tab key={idx} label={strDate} value={idx} />
         ))}
       </Tabs>
-      <Box p={2}>{dateArray[value]}</Box>
+      <Box p={2}>{dateArray[tabIndex]}</Box>
+      <ReceiptDialog
+        open={receiptDialogOpen}
+        onClose={handleReceiptInsertClose}
+      />
     </MainLayout>
   );
 };

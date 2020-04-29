@@ -30,8 +30,8 @@ from IPython import embed
 
 from .naver_ocr import image_NAVER_AI
 from .parse import parse_en, parse_jp
-from modules.check_images import angle
-from modules.translation import enko, naver_api
+from check_image import angle
+from translation import enko, naver_api
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer

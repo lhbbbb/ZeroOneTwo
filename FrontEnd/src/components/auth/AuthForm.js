@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { Typography, TextField, Button } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+
 const AuthFormWrapper = styled.div``;
 const FooterBlock = styled.div`
   margin-top: 2rem;
@@ -27,13 +30,46 @@ const TitleText = {
 const AuthForm = ({ type, form, onChange, onSubmit }) => {
   const text = TitleText[type];
   const history = useHistory();
-  const handleButtonClick = () => {
+  const loginData = useSelector((state) => state.auth.login);
+  const registerData = useSelector((state) => state.auth.register);
+
+  const postLogin = async () => {
+    try {
+      return await axios.post('http://13.124.235.236:8000/rest-auth/login/', {
+        username: loginData.userEmail,
+        password: loginData.password,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const postRegister = async () => {
+    try {
+      return await axios.post(
+        'http://13.124.235.236:8000/rest-auth/registration/',
+        {
+          username: registerData.userEmail,
+          password1: registerData.password,
+          password2: registerData.passwordConfirm,
+        },
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleButtonClick = async () => {
     if (type === 'login') {
+      const resData = await postLogin();
+      console.log(resData);
       history.push('/board');
     } else {
+      const resData = await postRegister();
       history.push('/login');
     }
   };
+
   return (
     <AuthFormWrapper>
       <Typography align="left" variant="h4">

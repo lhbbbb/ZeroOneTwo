@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth import get_user_model, authenticate, login
 from django.http import JsonResponse  
@@ -27,7 +30,8 @@ from IPython import embed
 
 from .naver_ocr import image_NAVER_AI
 from .parse import parse_en, parse_jp
-from .modules import main
+from modules.check_images import angle
+from modules.translation import enko, naver_api
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer
@@ -143,14 +147,14 @@ class ReceiptsDataView(generics.GenericAPIView):
             # 0 => 영수증 아님, 1 => 영수증
             is_receipts = np.argmax(predictions)
             if is_receipts: 
-                angle_result = main.angle.calculate_angles("images/" + file_name)
+                angle_result = angle.calculate_angles("images/" + file_name)
                 angle = angle_result[0]
                 ratio = angle_result[1]
                 if 80 <= angle <= 100 and ratio > 0.01:
                     OCR_result = image_NAVER_AI(img_string, country)
                     result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)        
                     for idx, item in enumerate(result.get('items')):
-                        translated = main.enko.enko_translation(item.get('item'))
+                        translated = enko.enko_translation(item.get('item'))
                         result['items'][idx]['item_translated'] = translated
                     return JsonResponse(result)
                 else:

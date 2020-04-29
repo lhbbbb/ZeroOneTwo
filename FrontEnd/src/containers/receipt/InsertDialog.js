@@ -7,17 +7,22 @@ import {
   Button,
 } from '@material-ui/core';
 import ReceiptInsertForm from '../../components/receipt/receiptInsertForm';
+import axios from 'axios';
+import moment from 'moment';
 
-const InsertDialog = ({ open, onClose }) => {
+const InsertDialog = ({ open, onClose, boardId }) => {
   const [image, setImage] = useState(null);
   const [date, setDate] = useState(null);
+  const [language, setLanguage] = useState('');
   const onChangeDate = (date) => {
     setDate(date);
   };
-
   const onChangeImage = (e) => {
     let image = e.target.files[0];
     setImage(image);
+  };
+  const onChangeLanguage = (e) => {
+    setLanguage(e.target.value);
   };
   const onRemoveImage = () => {
     setImage(null);
@@ -25,6 +30,21 @@ const InsertDialog = ({ open, onClose }) => {
 
   const handleReceiptInsert = (e) => {
     e.preventDefault();
+    let formData = new FormData();
+    formData.append('file', image);
+    console.log(formData);
+    let postData = {
+      date: moment(date).format('YYYY-MM-DDT') + '12:00:00',
+      country: language,
+      image: formData,
+      board: Number(boardId),
+    };
+    console.log(postData);
+    try {
+      axios.post('http://13.124.235.236:8000/api/Receipts/', postData);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -34,8 +54,10 @@ const InsertDialog = ({ open, onClose }) => {
         <ReceiptInsertForm
           image={image}
           date={date}
+          language={language}
           onChangeDate={onChangeDate}
           onChangeImage={onChangeImage}
+          onChangeLanguage={onChangeLanguage}
           onRemoveImage={onRemoveImage}
         />
       </DialogContent>

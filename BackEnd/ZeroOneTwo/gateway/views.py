@@ -15,6 +15,7 @@ import datetime
 import base64
 
 import tensorflow as tf
+import numpy as np
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -26,6 +27,7 @@ from IPython import embed
 
 from .naver_ocr import image_NAVER_AI
 from .parse import parse_en, parse_jp
+from .modules import main
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer
@@ -127,7 +129,7 @@ class ReceiptsDataView(generics.GenericAPIView):
             default_storage.save(file_name, file)
             
             # Load data
-            img = tf.io.read_file("images/test.jpg")
+            img = tf.io.read_file("images/" + file_name)
             img = decode_img(img).numpy()
 
             data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
@@ -139,13 +141,24 @@ class ReceiptsDataView(generics.GenericAPIView):
 
             predictions = np.array(json.loads(json_response.text)["predictions"])
             # 0 => 영수증 아님, 1 => 영수증
-            print(np.argmax(predictions))
-
-            OCR_result = image_NAVER_AI(img_string, country)
+            is_receipts = np.argmax(predictions)
+            if is_receipts: 
+                angle_result = main.angle.calculate_angles("images/" + file_name)
+                angle = angle_result[0]
+                ratio = angle_result[1]
+                if 80 <= angle <= 100 and ratio > 0.01:
+                    OCR_result = image_NAVER_AI(img_string, country)
+                    result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)        
+                    for idx, item in enumerate(result.get('items')):
+                        translated = main.enko.enko_translation(item.get('item'))
+                        result['items'][idx]['item_translated'] = translated
+                    return JsonResponse(result)
+                else:
+                    return JsonResponse({'result':'영수증이 너무 기울었습니다.'})
+            else:
+                return JsonResponse({'result':'영수증이 아닙니다.'})
             
-            result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)
-            embed()
-            
+                        
             # serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

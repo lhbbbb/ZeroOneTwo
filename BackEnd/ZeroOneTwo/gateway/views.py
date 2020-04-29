@@ -14,6 +14,8 @@ import json
 import datetime
 import base64
 
+import tensorflow as tf
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -80,6 +82,16 @@ def get_receipts(request, board_id):
     receipts = list(Receipts.objects.filter(board=board_id).values())
     return JsonResponse({"data": receipts})
 
+def decode_img(img):
+    # convert the compressed string to a 3D uint8 tensor
+    img = tf.image.decode_jpeg(img, channels=3)
+    # Use `convert_image_dtype` to convert to floats in the [0,1] range.
+    img = tf.image.convert_image_dtype(img, tf.float32)
+    # resize the image to the desired size.
+    img = tf.image.resize(img, [224, 224])
+    # set dimension for mobilenet_v2 input shape
+    img = tf.keras.applications.mobilenet_v2.preprocess_input(img[tf.newaxis, ...])
+    return img
 
 # Receipts URL
 class ReceiptsDataView(generics.GenericAPIView):
@@ -98,9 +110,12 @@ class ReceiptsDataView(generics.GenericAPIView):
             except:
                 data = {'result':'사진을 넣어주세요.'}
                 return JsonResponse(data)
+            
             b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
             img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환     
             
+            
+
             datetime_now = datetime.datetime.now()
             t_now = '{}_{}_{}_{}_{}_{}'.format(datetime_now.year, datetime_now.month, datetime_now.day, 
                                                datetime_now.hour, datetime_now.minute, datetime_now.second)
@@ -108,13 +123,29 @@ class ReceiptsDataView(generics.GenericAPIView):
             register = serializer.data.get('register')
             name = register if register else 'temp'
             file_name = name + '_' + t_now
+
+            default_storage.save(file_name, file)
             
+            # Load data
+            img = tf.io.read_file("images/test.jpg")
+            img = decode_img(img).numpy()
+
+            data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
+            headers = {"content-type": "application/json"}
+
+            json_response = requests.post(
+                "http://localhost:8501/v1/models/mobilenet:predict", data=data, headers=headers
+            )
+
+            predictions = np.array(json.loads(json_response.text)["predictions"])
+            # 0 => 영수증 아님, 1 => 영수증
+            print(np.argmax(predictions))
+
             OCR_result = image_NAVER_AI(img_string, country)
             
             result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)
             embed()
             
-            # default_storage.save(file.name, file)
             # serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -14,9 +14,11 @@ import matplotlib.pyplot as plt
 import os
 import pathlib
 
-# Load data
 from data import preprocess
-train, test = preprocess.load_data()
+from model import models
+
+# Load data
+train, test, STEPS_PER_EPOCH = preprocess.load_data()
 
 feature_extractor_url = "https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/2"  # @param {type:"string"}
 
@@ -39,7 +41,7 @@ model.compile(
 )
 
 
-batch_stats_callback = CollectBatchStats()
+batch_stats_callback = models.CollectBatchStats()
 
 history = model.fit_generator(
     train,
@@ -47,7 +49,7 @@ history = model.fit_generator(
     steps_per_epoch=STEPS_PER_EPOCH,
     callbacks=[batch_stats_callback],
 )
-
+tf.saved_model.save(model, "checkpoints/mobilenet/1/")
 # Loss plot
 # plt.figure()
 # plt.ylabel("Loss")
@@ -56,7 +58,7 @@ history = model.fit_generator(
 # plt.plot(batch_stats_callback.batch_losses)
 # plt.show()
 
-class_names = sorted(train_data_gen.class_indices.items(), key=lambda pair: pair[1])
+class_names = sorted(train.class_indices.items(), key=lambda pair: pair[1])
 class_names = np.array([key.title() for key, value in class_names])
 
 for image_batch, label_batch in test:
@@ -75,6 +77,7 @@ plt.subplots_adjust(hspace=0.5)
 for n in range(30):
     plt.subplot(6, 5, n + 1)
     plt.imshow(image_batch[n])
+    print(predicted_id[n])
     color = "green" if predicted_id[n] == label_id[n] else "red"
     plt.title(predicted_label_batch[n].title(), color=color)
     plt.axis("off")

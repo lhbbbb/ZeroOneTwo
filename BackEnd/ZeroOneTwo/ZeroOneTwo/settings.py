@@ -32,6 +32,8 @@ REST_FRAMEWORK = {
 INSTALLED_APPS = [
     'gateway',
     
+    'corsheaders',
+    
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
@@ -55,6 +57,9 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,6 +70,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'ZeroOneTwo.urls'
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 TEMPLATES = [
     {

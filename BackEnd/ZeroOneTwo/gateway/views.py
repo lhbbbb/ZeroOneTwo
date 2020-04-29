@@ -12,6 +12,7 @@ import urllib.request
 import requests
 import json
 import datetime
+import base64
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -42,6 +43,7 @@ class RateViewSet(viewsets.ModelViewSet):
     queryset = Rate.objects.all()
 
 
+# Boards URL
 class BoardsDataView(generics.GenericAPIView):
     serializer_class = BoardsModelSerializer
     # permission_classes = [IsAuthenticated,] # 인증
@@ -58,13 +60,43 @@ class BoardsDataView(generics.GenericAPIView):
     def post(self, request, format=None):
         data = request.data
         data['register'] = request.user.pk
-        embed()
         serializer = BoardsModelSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Receipts URL
+class ReceiptsDataView(generics.GenericAPIView):
+    serializer_class = ReceiptsModelSerializer
+    queryset = ''
+    
+    def get(self, request, format=None):
+        pass
+
+
+    def post(self, request, format=None):
+        pass
+    
+    # def get(self, request, format=None):
+    #     try:
+    #         boards = User.objects.get(pk=request.user.pk).boards.all()
+    #     except:
+    #         return JsonResponse({'error':'No user'})
+    #     serializer = BoardsModelSerializer(boards, many=True)
+    #     return Response(serializer.data)
+
+    # def post(self, request, format=None):
+    #     data = request.data
+    #     data['register'] = request.user.pk
+    #     serializer = BoardsModelSerializer(data=data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -78,7 +110,7 @@ def make_user(request):
 
 @api_view(['GET', 'POST'])
 def test(request):
-    obj = Boards.objects.get(user_id=request.user.pk)
+    # obj = Boards.objects.get(user_id=request.user.pk)
     # if request.method == 'POST':
     #     Boards.objects.create()
     try:
@@ -86,6 +118,11 @@ def test(request):
     except:
         data = {'result':'사진을 넣어주세요.'}
         return JsonResponse(data)
+    b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
+    img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환
+    # embed() 
+
+    
     # 파일 이름 수정하는 로직을 작성하자.
     file.name = 'test.jpg'
     default_storage.save(file.name, file)

@@ -65,6 +65,7 @@ class Receipts(models.Model):
     country = models.CharField(max_length=50, blank=True, null=True)
     currency = models.CharField(max_length=20, blank=True, null=True)
     image = models.ImageField(blank=True, null=True, upload_to='images')
+    total = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return self.place

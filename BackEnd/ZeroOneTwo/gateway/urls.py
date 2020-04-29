@@ -15,7 +15,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('rate/<int:mx>/', views.exchange),
     
-    # path(r'^test/', views.test), # 이미지 생성
+    path('test/', views.test), # 이미지 생성
     path('boards/', views.BoardsDataView.as_view()),
     
     ### 등록

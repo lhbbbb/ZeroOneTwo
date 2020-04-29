@@ -32,7 +32,7 @@ class Boards(models.Model):
 
 class Items(models.Model):
     item_id = models.AutoField(primary_key=True)
-    receipt = models.ForeignKey('Receipts', models.DO_NOTHING)
+    receipt = models.ForeignKey('Receipts', models.DO_NOTHING, blank=True, null=True)
     origin_name = models.CharField(max_length=50, blank=True, null=True)
     trans_name = models.CharField(max_length=50, blank=True, null=True)
     price = models.FloatField(blank=True, null=True)
@@ -61,7 +61,7 @@ class Receipts(models.Model):
     telephone = models.CharField(max_length=30, blank=True, null=True)
     register = models.ForeignKey('User', models.DO_NOTHING, db_column='register', blank=True, null=True)
     regdate = models.DateTimeField(blank=True, null=True)
-    board = models.ForeignKey(Boards, models.DO_NOTHING)
+    board = models.ForeignKey(Boards, models.DO_NOTHING, blank=True, null=True)
     country = models.CharField(max_length=50, blank=True, null=True)
     currency = models.CharField(max_length=20, blank=True, null=True)
     image = models.ImageField(blank=True, null=True, upload_to='images')

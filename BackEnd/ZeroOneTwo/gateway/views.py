@@ -20,8 +20,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics
 from rest_framework.renderers import JSONRenderer
 
-
 from IPython import embed
+
+from .naver_ocr import image_NAVER_AI
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer
@@ -99,6 +100,8 @@ class ReceiptsDataView(generics.GenericAPIView):
             b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
             img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환            
             embed()
+            country = data['country']
+            
             
             # serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

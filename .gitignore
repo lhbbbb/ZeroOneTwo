@@ -147,4 +147,4 @@ sketch
 
 venv/
 .env
-# mysqlclient-1.4.6-cp37-cp37m-win_amd64.whl
+mysqlclient-1.4.6-cp37-cp37m-win_amd64.whl

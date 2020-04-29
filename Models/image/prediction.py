@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-from data import preprocess
 import json
 import requests
 

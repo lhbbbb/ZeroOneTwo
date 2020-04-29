@@ -1,4 +1,4 @@
-from eunjeon import Mecab
+from konlpy.tag import Mecab
 import numpy as np
 import mxnet as mx
 import json

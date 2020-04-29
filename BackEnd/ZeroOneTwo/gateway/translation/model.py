@@ -5,7 +5,7 @@ import mxnet.autograd as autograd
 import mxnet as mx
 from  mxnet import gluon
 from mxnet.gluon import nn, rnn
-from eunjeon import Mecab
+from konlpy.tag import Mecab
 mecab = Mecab()
 
 

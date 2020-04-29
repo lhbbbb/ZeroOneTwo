@@ -1,5 +1,5 @@
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+# import sys, os
+# sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth import get_user_model, authenticate, login
@@ -27,12 +27,13 @@ from rest_framework import status, generics
 from rest_framework.renderers import JSONRenderer
 
 from IPython import embed
+from pprint import pprint
 
 from .naver_ocr import image_NAVER_AI
 from .parse import parse_en, parse_jp
 
-from check_image import angle
-from translation import enko, naver_api
+from .check_image import angle
+from .translation import enko, naver_api
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -89,17 +90,7 @@ def get_receipts(request, board_id):
     '''
     receipts = list(Receipts.objects.filter(board=board_id).values())
     return JsonResponse({"data": receipts})
-
-def decode_img(img):
-    # convert the compressed string to a 3D uint8 tensor
-    img = tf.image.decode_jpeg(img, channels=3)
-    # Use `convert_image_dtype` to convert to floats in the [0,1] range.
-    img = tf.image.convert_image_dtype(img, tf.float32)
-    # resize the image to the desired size.
-    img = tf.image.resize(img, [224, 224])
-    # set dimension for mobilenet_v2 input shape
-    img = tf.keras.applications.mobilenet_v2.preprocess_input(img[tf.newaxis, ...])
-    return img
+    
 
 # Receipts URL
 class ReceiptsDataView(generics.GenericAPIView):
@@ -127,16 +118,24 @@ class ReceiptsDataView(generics.GenericAPIView):
             datetime_now = datetime.datetime.now()
             t_now = '{}_{}_{}_{}_{}_{}'.format(datetime_now.year, datetime_now.month, datetime_now.day, 
                                                datetime_now.hour, datetime_now.minute, datetime_now.second)
-            country = serializer.data.get('country')
+            pprint(request.data)
+            pprint(serializer.data)
+            #country = serializer.data.get('country')
+            country = request.data.get('country')
+            print(country)
             register = serializer.data.get('register')
             name = register if register else 'temp'
-            file_name = name + '_' + t_now
+            file_name = name + '_' + t_now + '.jpg'
 
             default_storage.save(file_name, file)
             
             # Load data
-            img = tf.io.read_file("images/" + file_name)
-            img = decode_img(img).numpy()
+            img = tf.keras.preprocessing.image.load_img("images/" + file_name, target_size=[224, 224])
+
+            img = tf.keras.preprocessing.image.img_to_array(img)
+            img = tf.keras.applications.mobilenet_v2.preprocess_input(img[tf.newaxis,...])
+
+
 
             data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
             headers = {"content-type": "application/json"}
@@ -149,12 +148,15 @@ class ReceiptsDataView(generics.GenericAPIView):
             # 0 => 영수증 아님, 1 => 영수증
             is_receipts = np.argmax(predictions)
             if is_receipts: 
+                global angle
                 angle_result = angle.calculate_angles("images/" + file_name)
-                angle = angle_result[0]
-                ratio = angle_result[1]
-                if 80 <= angle <= 100 and ratio > 0.01:
+                print(angle_result)
+                if -10 <= angle_result[0] <= 10 or 80 <= angle_result[0] <= 100:
                     OCR_result = image_NAVER_AI(img_string, country)
+                    
+                    #pprint.pprint(OCR_result)
                     result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)        
+                    #pprint.pprint(result)
                     for idx, item in enumerate(result.get('items')):
                         translated = enko.enko_translation(item.get('item'))
                         result['items'][idx]['item_translated'] = translated

@@ -17,6 +17,7 @@ urlpatterns = [
     
     path('test/', views.test), # 이미지 생성
     path('boards/', views.BoardsDataView.as_view()),
+    path('boards/<int:board_id>/', views.get_receipts),
     
     ### 등록
     # 로그인 및 회원가입. 

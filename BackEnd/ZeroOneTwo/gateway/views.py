@@ -18,6 +18,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics
+from rest_framework.renderers import JSONRenderer
 
 
 from IPython import embed
@@ -68,6 +69,16 @@ class BoardsDataView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["GET"])
+def get_receipts(request, board_id):
+    '''
+    특정 보드에 해당하는 모든 영수증을 반환합니다.
+    Board의 id를 url로 전달해야합니다.
+    '''
+    receipts = list(Receipts.objects.filter(board=board_id).values())
+    return JsonResponse({"data": receipts})
+
+
 # Receipts URL
 class ReceiptsDataView(generics.GenericAPIView):
     serializer_class = ReceiptsModelSerializer
@@ -78,8 +89,13 @@ class ReceiptsDataView(generics.GenericAPIView):
 
 
     def post(self, request, format=None):
-        pass
-    
+        data = request.data
+        data['register'] = request.user.pk
+        serializer = ReceiptsModelSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     # def get(self, request, format=None):
     #     try:
     #         boards = User.objects.get(pk=request.user.pk).boards.all()
@@ -87,25 +103,6 @@ class ReceiptsDataView(generics.GenericAPIView):
     #         return JsonResponse({'error':'No user'})
     #     serializer = BoardsModelSerializer(boards, many=True)
     #     return Response(serializer.data)
-
-    # def post(self, request, format=None):
-    #     data = request.data
-    #     data['register'] = request.user.pk
-    #     serializer = BoardsModelSerializer(data=data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# 등록
-def make_user(request):
-    import IPython
-    IPython.embed()
-    
-    pass
 
 
 @api_view(['GET', 'POST'])

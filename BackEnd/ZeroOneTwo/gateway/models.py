@@ -22,9 +22,9 @@ class Boards(models.Model):
     startdate = models.DateField(blank=True, null=True)
     enddate = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    register = models.ForeignKey('User', models.DO_NOTHING, db_column='register', related_name='board_register')
+    register = models.ForeignKey('User', models.DO_NOTHING, db_column='register', related_name='board_register', blank=True, null=True)
     regdate = models.DateTimeField(auto_now_add=True)
-    entry = models.ManyToManyField(User, related_name='boards')
+    entry = models.ManyToManyField(User, related_name='boards', blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -59,7 +59,7 @@ class Receipts(models.Model):
     place = models.CharField(max_length=100, blank=True, null=True)
     address = models.CharField(max_length=200, blank=True, null=True)
     telephone = models.CharField(max_length=30, blank=True, null=True)
-    register = models.ForeignKey('User', models.DO_NOTHING, db_column='register')
+    register = models.ForeignKey('User', models.DO_NOTHING, db_column='register', blank=True, null=True)
     regdate = models.DateTimeField()
     board = models.ForeignKey(Boards, models.DO_NOTHING)
     country = models.CharField(max_length=50, blank=True, null=True)

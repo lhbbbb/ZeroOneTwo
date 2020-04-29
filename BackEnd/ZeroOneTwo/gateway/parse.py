@@ -138,7 +138,7 @@ def parse_jp(content):
         temp_texts.append({"text": c["inferText"], "min": temp_min, "max": temp_max})
         temp_y = max_y
     texts.append(temp_texts)
-    pprint(texts)
+    # pprint(texts)
 
     r_items = r"¥|TOTAL|合計"
     r_date = r"[\d]+[/:][\d]*"
@@ -174,13 +174,13 @@ def parse_jp(content):
     result = {}
     result["title"] = title
     result["date"] = date[0] if date else ""
-    print(title)
-    pprint(items)
-    pprint(date)
+    # print(title)
+    # pprint(items)
+    # pprint(date)
 
     total_str = ""
     for i in sum(items, []):
-        print(i)
+        # print(i)
         if re.search(r_total, i.upper()):
             total_strs = re.findall(r_int, i)
             for idx, s in enumerate(total_strs):
@@ -210,7 +210,7 @@ def parse_jp(content):
         if re.search(r_filters, i.upper()):
             continue
         else:
-            print(i)
+            # print(i)
             r_yen = re.compile(r"(¥)")
             j = r_yen.sub("", i)
             price = re.findall(r_price, j)

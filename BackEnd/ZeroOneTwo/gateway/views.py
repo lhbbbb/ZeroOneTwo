@@ -23,6 +23,7 @@ from rest_framework.renderers import JSONRenderer
 from IPython import embed
 
 from .naver_ocr import image_NAVER_AI
+from .parse import parse_en, parse_jp
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer
@@ -98,11 +99,22 @@ class ReceiptsDataView(generics.GenericAPIView):
                 data = {'result':'사진을 넣어주세요.'}
                 return JsonResponse(data)
             b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
-            img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환            
+            img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환     
+            
+            datetime_now = datetime.datetime.now()
+            t_now = '{}_{}_{}_{}_{}_{}'.format(datetime_now.year, datetime_now.month, datetime_now.day, 
+                                               datetime_now.hour, datetime_now.minute, datetime_now.second)
+            country = serializer.data.get('country')
+            register = serializer.data.get('register')
+            name = register if register else 'temp'
+            file_name = name + '_' + t_now
+            
+            OCR_result = image_NAVER_AI(img_string, country)
+            
+            result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)
             embed()
-            country = data['country']
             
-            
+            # default_storage.save(file.name, file)
             # serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

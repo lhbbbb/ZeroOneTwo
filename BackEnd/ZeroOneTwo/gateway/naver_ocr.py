@@ -10,7 +10,7 @@ import base64
 from decouple import config
 
 
-def image_NAVER_AI(img_64, name, country):
+def image_NAVER_AI(img_64, country):
     TEMPLATE = {
         "images": [
         {
@@ -43,4 +43,4 @@ def image_NAVER_AI(img_64, name, country):
         result_dict = json.loads(result_str)
         return result_dict
     else:
-        return rescode
+        return None

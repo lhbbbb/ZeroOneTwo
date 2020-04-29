@@ -27,7 +27,7 @@ from IPython import embed
 
 from .naver_ocr import image_NAVER_AI
 from .parse import parse_en, parse_jp
-from .modules import main
+from modules import main
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer

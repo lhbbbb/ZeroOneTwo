@@ -83,17 +83,24 @@ def get_receipts(request, board_id):
 class ReceiptsDataView(generics.GenericAPIView):
     serializer_class = ReceiptsModelSerializer
     queryset = ''
-    
+
     def get(self, request, format=None):
         pass
 
-
     def post(self, request, format=None):
         data = request.data
-        data['register'] = request.user.pk
         serializer = ReceiptsModelSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            try:
+                file = request.FILES['image']
+            except:
+                data = {'result':'사진을 넣어주세요.'}
+                return JsonResponse(data)
+            b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
+            img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환            
+            embed()
+            
+            # serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     # def get(self, request, format=None):

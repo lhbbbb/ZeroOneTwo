@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import InsertDialog from '../../containers/board/InsertDialog';
@@ -47,39 +48,18 @@ const InnerTypo = styled(Typography)`
   padding-left: 0.5rem;
 `;
 
-const TempData = [
-  {
-    boardId: 1,
-    title: '부산여행 정산',
-    description:
-      'Consequat mauris nunc congue nisi vitae suscipit. Fringilla estullamcorper eget nulla facilisi etiam dignissim di. Consequat mauris nunc congue nisi vitae suscipit. Fringilla estullamcorper eget nulla facilisi etiam dignissim di.',
-    startDate: '2020.01.01',
-    endDate: '2020.01.10',
-    writer: '장영준',
-  },
-  {
-    boardId: 2,
-    title: '샌프란시스코 정산',
-    description:
-      'Consequat mauris nunc congue nisi vitae suscipit. Fringilla estullamcorper eget nulla facilisi etiam dignissim di. Consequat mauris nunc congue nisi vitae suscipit. Fringilla estullamcorper eget nulla facilisi etiam dignissim di.',
-    startDate: '2020.01.01',
-    endDate: '2020.01.10',
-    writer: '장영준',
-  },
-  {
-    boardId: 3,
-    title: '개발개발개발',
-    description:
-      'Consequat mauris nunc congue nisi vitae suscipit. Fringilla estullamcorper eget nulla facilisi etiam dignissim di. Consequat mauris nunc congue nisi vitae suscipit. Fringilla estullamcorper eget nulla facilisi etiam dignissim di.',
-    startDate: '2020.01.01',
-    endDate: '2020.01.10',
-    writer: '장영준',
-  },
-];
-
 const BoardPage = () => {
   const history = useHistory();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [boardList, setBoardList] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://13.124.235.236:8000/api/Boards/').then(({ data }) => {
+      console.log(data);
+      setBoardList(data);
+    });
+  }, []);
+
   const handleDialogOpen = () => {
     setDialogOpen(true);
   };
@@ -104,9 +84,9 @@ const BoardPage = () => {
             </Button>
           </ButtonGrid>
           <Grid container>
-            {TempData.map((data) => (
-              <StyledCard key={data.boardId}>
-                <CardActionArea onClick={() => handleBoardClick(data.boardId)}>
+            {boardList.map((data) => (
+              <StyledCard key={data.board_id}>
+                <CardActionArea onClick={() => handleBoardClick(data.board_id)}>
                   <CardContent>
                     <Typography variant="h5">{data.title}</Typography>
                     <Typography
@@ -117,14 +97,14 @@ const BoardPage = () => {
                       {data.description}
                     </Typography>
                     <Typography variant="body2" align="left">
-                      작성자: {data.writer}
+                      작성자: {data.register}
                     </Typography>
                     <Typography variant="body2" align="left">
-                      진행일자: {data.startDate} ~ {data.endDate}
+                      진행일자: {data.startdate} ~ {data.enddate}
                     </Typography>
                   </CardContent>
                 </CardActionArea>
-                {data.participants && (
+                {/* {data.participants && (
                   <>
                     <Divider variant="middle"></Divider>
                     <AvatarBlock>
@@ -140,7 +120,7 @@ const BoardPage = () => {
                       </InnerTypo>
                     </AvatarBlock>
                   </>
-                )}
+                )} */}
               </StyledCard>
             ))}
           </Grid>

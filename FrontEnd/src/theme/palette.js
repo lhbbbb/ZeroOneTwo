@@ -6,10 +6,10 @@ const black = '#000000';
 export default {
   // black,
   // white,
-  // primary: {
-  //   contrastText: white,
-  //   main: moyocolor.moyo_green_1,
-  // },
+  primary: {
+    contrastText: white,
+    main: '#014023',
+  },
   // secondary: {
   //   contrastText: white,
   //   dark: colors.blue[900],

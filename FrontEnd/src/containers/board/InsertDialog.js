@@ -9,6 +9,8 @@ import {
 } from '@material-ui/core';
 import { changeField, initializeForm } from '../../modules/board';
 import InsertForm from '../../components/board/InsertForm';
+import axios from 'axios';
+import moment from 'moment';
 
 const InsertDialog = ({ open, onClose }) => {
   const dispatch = useDispatch();
@@ -44,6 +46,18 @@ const InsertDialog = ({ open, onClose }) => {
   };
   const handleBoardInsert = (e) => {
     e.preventDefault();
+    try {
+      axios.post('http://13.124.235.236:8000/boards/', {
+        title: form.title,
+        startdate: moment(form.startDate).format('YYYY-MM-DD'),
+        enddate: moment(form.endDate).format('YYYY-MM-DD'),
+        description: form.description,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      onClose();
+    }
   };
   const handleClose = (e) => {
     e.preventDefault();

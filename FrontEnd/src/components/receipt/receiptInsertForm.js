@@ -8,6 +8,9 @@ import {
   CardContent,
   IconButton,
   CardMedia,
+  MenuItem,
+  Input,
+  Select,
 } from '@material-ui/core';
 import ClearIcon from '@material-ui/icons/Clear';
 import DateFnsUtils from '@date-io/moment';
@@ -42,10 +45,22 @@ const LineGrid = styled(Grid)`
 const receiptInsertForm = ({
   date,
   image,
+  language,
   onChangeDate,
   onChangeImage,
+  onChangeLanguage,
   onRemoveImage,
 }) => {
+  const languageList = [
+    {
+      name: '영어',
+      value: 'en',
+    },
+    {
+      name: '일본어',
+      value: 'jp',
+    },
+  ];
   return (
     <Grid container>
       <LineGrid container>
@@ -62,6 +77,25 @@ const receiptInsertForm = ({
               onChange={onChangeDate}
             />
           </MuiPickersUtilsProvider>
+        </Grid>
+      </LineGrid>
+      <LineGrid container>
+        <LabelGrid container item xs={3} alignItems="center" justify="flex-end">
+          <Typography variant="body2">영수증 언어</Typography>
+        </LabelGrid>
+        <Grid item xs={9}>
+          <Select
+            fullWidth
+            value={language}
+            onChange={onChangeLanguage}
+            input={<Input />}
+          >
+            {languageList.map(({ name, value }) => (
+              <MenuItem key={value} value={value}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
         </Grid>
       </LineGrid>
       <LineGrid container>

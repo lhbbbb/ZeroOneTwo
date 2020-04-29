@@ -48,7 +48,7 @@ def load_data():
         classes=list(CLASS_NAMES),
     )
 
-    return test_data_gen, train_data_gen
+    return test_data_gen, train_data_gen, STEPS_PER_EPOCH
 
 
 def show_batch(image_batch, label_batch):

@@ -1,12 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TextField, Grid } from '@material-ui/core';
+import { TextField, Grid, Typography } from '@material-ui/core';
 import DateFnsUtils from '@date-io/moment';
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-import typography from '../../theme/typography';
 
 const LineGrid = styled(Grid)`
   & + & {
@@ -22,7 +21,7 @@ const InsertForm = ({ form, onChange, setStartDate, setEndDate }) => {
     <Grid container>
       <LineGrid container>
         <LabelGrid item container xs={3} alignItems="center" justify="flex-end">
-          <typography variant="h6">보드 제목</typography>
+          <Typography variant="body1">보드 제목</Typography>
         </LabelGrid>
         <Grid item xs={9}>
           <TextField
@@ -36,7 +35,7 @@ const InsertForm = ({ form, onChange, setStartDate, setEndDate }) => {
       </LineGrid>
       <LineGrid container>
         <LabelGrid item container xs={3} justify="flex-end">
-          <typography variant="h6">보드 내용</typography>
+          <Typography variant="body1">보드 내용</Typography>
         </LabelGrid>
         <Grid item xs={9}>
           <TextField
@@ -53,7 +52,7 @@ const InsertForm = ({ form, onChange, setStartDate, setEndDate }) => {
       </LineGrid>
       <LineGrid container>
         <LabelGrid item container xs={3} alignItems="center" justify="flex-end">
-          <typography variant="h6">보드 날짜</typography>
+          <Typography variant="body1">보드 날짜</Typography>
         </LabelGrid>
         <Grid item xs={4}>
           <MuiPickersUtilsProvider utils={DateFnsUtils}>

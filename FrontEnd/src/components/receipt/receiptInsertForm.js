@@ -22,13 +22,21 @@ const PreviewCard = styled(Card)`
 `;
 const PreviewCardMedia = styled(CardMedia)`
   width: inherit;
-  height: 20vh;
+  height: 30vh;
 `;
 const TitleCardContent = styled(CardContent)`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem !important;
+`;
+const LabelGrid = styled(Grid)`
+  padding-right: 1rem;
+`;
+const LineGrid = styled(Grid)`
+  & + & {
+    margin-top: 1rem;
+  }
 `;
 
 const receiptInsertForm = ({
@@ -40,55 +48,61 @@ const receiptInsertForm = ({
 }) => {
   return (
     <Grid container>
-      <Grid container item xs={3} alignItems="center">
-        <Typography variant="h6">영수증 날짜</Typography>
-      </Grid>
-      <Grid item xs={9}>
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <KeyboardDatePicker
-            name="startDate"
-            format="YYYY.MM.DD"
-            fullWidth
-            value={date}
-            onChange={onChangeDate}
+      <LineGrid container>
+        <LabelGrid container item xs={3} alignItems="center" justify="flex-end">
+          <Typography variant="body2">영수증 날짜</Typography>
+        </LabelGrid>
+        <Grid item xs={9}>
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker
+              name="startDate"
+              format="YYYY.MM.DD"
+              fullWidth
+              value={date}
+              onChange={onChangeDate}
+            />
+          </MuiPickersUtilsProvider>
+        </Grid>
+      </LineGrid>
+      <LineGrid container>
+        <LabelGrid container item xs={3} alignItems="center" justify="flex-end">
+          <Typography variant="body2">이미지</Typography>
+        </LabelGrid>
+        <Grid item xs={9}>
+          <input
+            accept="image/*"
+            style={{ display: 'none' }}
+            id="contained-button-file"
+            type="file"
+            onChange={onChangeImage}
           />
-        </MuiPickersUtilsProvider>
-      </Grid>
-      <Grid container item xs={3}>
-        <Typography variant="h6">이미지</Typography>
-      </Grid>
-      <Grid item xs={9}>
-        <input
-          accept="image/*"
-          style={{ display: 'none' }}
-          id="contained-button-file"
-          type="file"
-          onChange={onChangeImage}
-        />
-        <label htmlFor="contained-button-file">
-          <Button variant="contained" color="primary" component="span">
-            이미지 추가
-          </Button>
-        </label>
-      </Grid>
-      <Grid item xs={12}>
-        {image !== null && (
-          <PreviewCard>
-            <PreviewCardMedia image={URL.createObjectURL(image)} />
-            <TitleCardContent>
-              <Typography variant="body2" noWrap={true}>
-                {image.name}
-              </Typography>
-              <IconButton
-                aria-label="previewImageClear"
-                onClick={onRemoveImage}
-              >
-                <ClearIcon />
-              </IconButton>
-            </TitleCardContent>
-          </PreviewCard>
-        )}
-      </Grid>
+          <label htmlFor="contained-button-file">
+            <Button variant="contained" color="primary" component="span">
+              이미지 추가
+            </Button>
+          </label>
+        </Grid>
+      </LineGrid>
+      <LineGrid container>
+        <Grid item xs={12}>
+          {image !== null && (
+            <PreviewCard>
+              <PreviewCardMedia image={URL.createObjectURL(image)} />
+              <TitleCardContent>
+                <Typography variant="body2" noWrap={true}>
+                  {image.name}
+                </Typography>
+                <IconButton
+                  aria-label="previewImageClear"
+                  onClick={onRemoveImage}
+                >
+                  <ClearIcon />
+                </IconButton>
+              </TitleCardContent>
+            </PreviewCard>
+          )}
+        </Grid>
+      </LineGrid>
     </Grid>
   );
 };

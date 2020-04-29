@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import 'moment/locale/ko';
 import styled from 'styled-components';
@@ -23,10 +23,6 @@ const TempData = {
   startDate: '2020.01.01',
   endDate: '2020.01.10',
   writer: '장영준',
-  participants: [
-    { username: '하지수', url: require('../../assets/testImage/하지수.png') },
-    { username: '아이린', url: require('../../assets/testImage/아이린.png') },
-  ],
   receipts: [
     {
       receiptId: 12100,
@@ -59,7 +55,6 @@ const TempData = {
 };
 
 const BoardMainPage = () => {
-  const history = useHistory();
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -93,7 +88,7 @@ const BoardMainPage = () => {
           color="primary"
           onClick={handleReceiptInsertOpen}
         >
-          영수중 추가(다이얼로그)
+          영수중 추가
         </Button>
       </Grid>
 
@@ -105,8 +100,6 @@ const BoardMainPage = () => {
       <Typography variant="body2" color="textSecondary">
         {TempData.description}
       </Typography>
-      <Divider />
-      <Typography variant="body1">공유하는 사람 리스트</Typography>
       <Divider />
       <Tabs
         value={tabIndex}

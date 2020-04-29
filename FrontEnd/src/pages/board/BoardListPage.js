@@ -56,10 +56,6 @@ const TempData = [
     startDate: '2020.01.01',
     endDate: '2020.01.10',
     writer: '장영준',
-    participants: [
-      { username: '하지수', url: require('../../assets/testImage/하지수.png') },
-      { username: '아이린', url: require('../../assets/testImage/아이린.png') },
-    ],
   },
   {
     boardId: 2,
@@ -69,10 +65,6 @@ const TempData = [
     startDate: '2020.01.01',
     endDate: '2020.01.10',
     writer: '장영준',
-    participants: [
-      { username: '하지수', url: require('../../assets/testImage/하지수.png') },
-      { username: '아이린', url: require('../../assets/testImage/아이린.png') },
-    ],
   },
   {
     boardId: 3,
@@ -82,10 +74,6 @@ const TempData = [
     startDate: '2020.01.01',
     endDate: '2020.01.10',
     writer: '장영준',
-    participants: [
-      { username: '하지수', url: require('../../assets/testImage/하지수.png') },
-      { username: '아이린', url: require('../../assets/testImage/아이린.png') },
-    ],
   },
 ];
 
@@ -136,19 +124,23 @@ const BoardPage = () => {
                     </Typography>
                   </CardContent>
                 </CardActionArea>
-                <Divider variant="middle"></Divider>
-                <AvatarBlock>
-                  {data.participants.map((participant) => (
-                    <Avatar
-                      key={participant.username}
-                      alt={participant.username}
-                      src={participant.url}
-                    />
-                  ))}
-                  <InnerTypo variant="body2" align="center" display="block">
-                    님과 함께 공유중입니다.
-                  </InnerTypo>
-                </AvatarBlock>
+                {data.participants && (
+                  <>
+                    <Divider variant="middle"></Divider>
+                    <AvatarBlock>
+                      {data.participants.map((participant) => (
+                        <Avatar
+                          key={participant.username}
+                          alt={participant.username}
+                          src={participant.url}
+                        />
+                      ))}
+                      <InnerTypo variant="body2" align="center" display="block">
+                        님과 함께 공유중입니다.
+                      </InnerTypo>
+                    </AvatarBlock>
+                  </>
+                )}
               </StyledCard>
             ))}
           </Grid>

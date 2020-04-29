@@ -7,7 +7,7 @@ class User(AbstractUser):
     user_id = models.AutoField(primary_key=True)
     nickname = models.CharField(max_length=20, blank=True, null=True)
     active = models.IntegerField(default=1)
-    regdate = models.DateTimeField(auto_now_add=True)
+    regdate = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     sleepdate = models.DateTimeField(blank=True, null=True)
     withdrawdate = models.DateTimeField(blank=True, null=True)
     custom_password = models.CharField(max_length=50, blank=True, null=True)
@@ -50,7 +50,7 @@ class Rate(models.Model):
     cha = models.FloatField(blank=True, null=True)
     way = models.CharField(max_length=20, blank=True, null=True)
     register = models.ForeignKey('User', models.DO_NOTHING, db_column='register')
-    regdate = models.DateTimeField()
+    regdate = models.DateTimeField(blank=True, null=True)
 
 
 class Receipts(models.Model):
@@ -60,7 +60,7 @@ class Receipts(models.Model):
     address = models.CharField(max_length=200, blank=True, null=True)
     telephone = models.CharField(max_length=30, blank=True, null=True)
     register = models.ForeignKey('User', models.DO_NOTHING, db_column='register', blank=True, null=True)
-    regdate = models.DateTimeField()
+    regdate = models.DateTimeField(blank=True, null=True)
     board = models.ForeignKey(Boards, models.DO_NOTHING)
     country = models.CharField(max_length=50, blank=True, null=True)
     currency = models.CharField(max_length=20, blank=True, null=True)

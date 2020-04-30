@@ -117,6 +117,7 @@ class ReceiptsDataView(generics.GenericAPIView):
                                             datetime_now.hour, datetime_now.minute, datetime_now.second)
         
         country = request.data.get('country')
+        
         name = request.user.username if request.user.username else 'temp'
         file_name = name + '_' + t_now + '.jpg'
 

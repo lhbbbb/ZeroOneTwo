@@ -149,3 +149,14 @@ venv/
 .env
 mysqlclient-1.4.6-cp37-cp37m-win_amd64.whl
 Backend/ZeroOneTwo/images/
+
+# dataset raw image
+images/
+Models/image/datasets/raw
+
+# NMT model params
+Models/test/*/*.params
+Models/test/*/*.dic
+Models/test/*/*.mdl
+Models/test/*/*.np
+Models/test/*/*.txt

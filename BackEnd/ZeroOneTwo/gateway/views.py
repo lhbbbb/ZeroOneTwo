@@ -98,6 +98,7 @@ class ReceiptsDataView(generics.GenericAPIView):
     queryset = ''
 
     def get(self, request, format=None):
+        
         pass
 
     def post(self, request, format=None):
@@ -112,8 +113,6 @@ class ReceiptsDataView(generics.GenericAPIView):
             
             b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
             img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환     
-            
-            
 
             datetime_now = datetime.datetime.now()
             t_now = '{}_{}_{}_{}_{}_{}'.format(datetime_now.year, datetime_now.month, datetime_now.day, 

@@ -1,3 +1,6 @@
+# import sys, os
+# sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth import get_user_model, authenticate, login
 from django.http import JsonResponse  
@@ -13,6 +16,10 @@ import requests
 import json
 import datetime
 import base64
+import platform
+
+import tensorflow as tf
+import numpy as np
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -20,8 +27,21 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics
 from rest_framework.renderers import JSONRenderer
 
-
 from IPython import embed
+from pprint import pprint
+
+from .naver_ocr import image_NAVER_AI
+from .parse import parse_en, parse_jp
+
+from .check_image import angle
+from .translation import enko, naver_api
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
+from .naverNMT import papago_translation
+
+SYSTEM = platform.system()
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer
@@ -79,54 +99,119 @@ def get_receipts(request, board_id):
     return JsonResponse({"data": receipts})
 
 
+# @method_decorator(csrf_exempt)
+@api_view(['POST'])
+def save_receipts(request):
+    data = request.data
+    receipt = Receipts.objects.get(pk=data['receipt_id'])
+    receipt.place = data.get('title')
+    try:
+        receipt.date = data.get('date')
+    except:
+        return JsonResponse({"result":"날짜형식이 잘못되었습니다."})
+    receipt.total = data.get('total')
+    receipt.board = Boards.objects.get(pk=data.get('board_id'))
+    receipt.image = data.get('image')
+    receipt.country = data.get('country')
+    receipt.save()
+    
+    for item in data.get('items'):
+        temp_item = Items.objects.create()
+        temp_item.receipt = receipt
+        temp_item.origin_name = item.get('item')
+        temp_item.trans_name = item.get('item_translated')
+        temp_item.price = item.get('price')
+        temp_item.save()
+
+    return JsonResponse({"result": "saved!"})
+    
+
+
+@api_view(["GET"])
+def get_items(request, receipt_id):
+    '''
+    특정 영수증에 해당하는 모든 항목들을 반환합니다.
+    receipt의 id를 url로 전달해야합니다.
+    '''
+    items = list(Items.objects.filter(receipt=receipt_id).values())
+    return JsonResponse({"data": items})
+
+
 # Receipts URL
 class ReceiptsDataView(generics.GenericAPIView):
     serializer_class = ReceiptsModelSerializer
     queryset = ''
     
     def get(self, request, format=None):
+        
         pass
-
 
     def post(self, request, format=None):
         data = request.data
-        data['register'] = request.user.pk
-        serializer = ReceiptsModelSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # def get(self, request, format=None):
-    #     try:
-    #         boards = User.objects.get(pk=request.user.pk).boards.all()
-    #     except:
-    #         return JsonResponse({'error':'No user'})
-    #     serializer = BoardsModelSerializer(boards, many=True)
-    #     return Response(serializer.data)
+        try:
+            file = request.FILES['image']
+        except:
+            data = {'result':'사진을 넣어주세요.'}
+            return JsonResponse(data)
+        
+        b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
+        img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환     
 
+        datetime_now = datetime.datetime.now()
+        t_now = '{}_{}_{}_{}_{}_{}'.format(datetime_now.year, datetime_now.month, datetime_now.day, 
+                                            datetime_now.hour, datetime_now.minute, datetime_now.second)
+        
+        country = request.data.get('country')
+        
+        name = request.user.username if request.user.username else 'temp'
+        file_name = name + '_' + t_now + '.jpg'
 
-@api_view(['GET', 'POST'])
-def test(request):
-    # obj = Boards.objects.get(user_id=request.user.pk)
-    # if request.method == 'POST':
-    #     Boards.objects.create()
-    try:
-        file = request.FILES['image']
-    except:
-        data = {'result':'사진을 넣어주세요.'}
-        return JsonResponse(data)
-    b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
-    img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환
-    # embed() 
+        default_storage.save(file_name, file)
+        
+        # Load data
+        img = tf.keras.preprocessing.image.load_img("images/" + file_name, target_size=[224, 224])
+        img = tf.keras.preprocessing.image.img_to_array(img)
+        img = tf.keras.applications.mobilenet_v2.preprocess_input(img[tf.newaxis,...])
+        
+        data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
+        headers = {"content-type": "application/json"}
+        
+        if SYSTEM == 'Windows':
+            json_response = requests.post(
+                "http://i02a408.p.ssafy.io:8501/v1/models/mobilenet:predict", data=data, headers=headers)  
+        else: 
+            json_response = requests.post(
+                "http://localhost:8501/v1/models/mobilenet:predict", data=data, headers=headers)
 
-    
-    # 파일 이름 수정하는 로직을 작성하자.
-    file.name = 'test.jpg'
-    default_storage.save(file.name, file)
-    
-    data = {'result':'사진이 저장되었습니다.'}    
-    # 
-    return JsonResponse(data)
+        predictions = np.array(json.loads(json_response.text)["predictions"])
+        # 0 => 영수증 아님, 1 => 영수증
+        is_receipts = np.argmax(predictions)
+        if is_receipts: 
+            global angle
+            angle_result = angle.calculate_angles("images/" + file_name)
+            if -10 <= angle_result[0] <= 10 or 80 <= angle_result[0] <= 100:
+                OCR_result = image_NAVER_AI(img_string, country)
+                result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)
+                for idx, item in enumerate(result.get('items')):
+                    translated = papago_translation(item.get('item'), country)
+                    result['items'][idx]['item_translated'] = translated
+                if SYSTEM == 'Windows':
+                    result['image'] = 'http://localhost:8000/images/' + file_name
+                else:
+                    result['image'] = 'http://i02a408.p.ssafy.io:8000/images/' + file_name
+                temp_obj = Receipts.objects.create()
+                result['receipt_id'] = temp_obj.pk
+                result['country'] = country
+                return JsonResponse(result)
+            else:
+                return JsonResponse({'result':'영수증이 너무 기울었습니다.'})
+        else:
+            return JsonResponse({'result':'영수증이 아닙니다.'})
+            
+            # serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET'])
@@ -138,14 +223,10 @@ def index(request):
 
 
 
-
-
-
-
-
-
-
 def exchange(request, mx):
+    '''
+    환율 정보를 가져와 DB에 저장하는 URL입니다.
+    '''
     exchange_SECRET_KEY=config('exchange_SECRET_KEY')
     
     for i in range(0, mx):

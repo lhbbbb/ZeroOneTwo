@@ -15,18 +15,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('rate/<int:mx>/', views.exchange),
     
-    path('test/', views.test), # 이미지 생성
     path('boards/', views.BoardsDataView.as_view()),
     path('boards/<int:board_id>/', views.get_receipts),
-    
-    ### 등록
-    # 로그인 및 회원가입. 
-    # 보드 등록
-    # 영수증 등록
-    # 항목들 등록
-    
-    ### 조회
-    # 보드 조회
-    # 영수증 조회
-    # 항목들 조회
+    path('receipts/', views.ReceiptsDataView.as_view()),
+    path('receipts/new/', views.save_receipts),
+    path('receipts/<int:receipt_id>/', views.get_items),
 ]

@@ -1,3 +1,9 @@
+import platform
+if platform.system() == 'Windows':
+    from eunjeon import Mecab
+else:
+    from konlpy.tag import Mecab
+
 import numpy as np
 import pandas as pd
 from mxnet import nd as  F
@@ -5,7 +11,7 @@ import mxnet.autograd as autograd
 import mxnet as mx
 from  mxnet import gluon
 from mxnet.gluon import nn, rnn
-from konlpy.tag import Mecab
+
 mecab = Mecab()
 
 

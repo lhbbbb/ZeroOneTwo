@@ -90,116 +90,72 @@ def get_receipts(request, board_id):
     '''
     receipts = list(Receipts.objects.filter(board=board_id).values())
     return JsonResponse({"data": receipts})
-    
+
 
 # Receipts URL
 class ReceiptsDataView(generics.GenericAPIView):
     serializer_class = ReceiptsModelSerializer
     queryset = ''
-
+    
     def get(self, request, format=None):
         
         pass
 
     def post(self, request, format=None):
         data = request.data
-        serializer = ReceiptsModelSerializer(data=data)
-        if serializer.is_valid():
-            try:
-                file = request.FILES['image']
-            except:
-                data = {'result':'사진을 넣어주세요.'}
-                return JsonResponse(data)
-            
-            b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
-            img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환     
+        try:
+            file = request.FILES['image']
+        except:
+            data = {'result':'사진을 넣어주세요.'}
+            return JsonResponse(data)
+        
+        b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
+        img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환     
 
-            datetime_now = datetime.datetime.now()
-            t_now = '{}_{}_{}_{}_{}_{}'.format(datetime_now.year, datetime_now.month, datetime_now.day, 
-                                               datetime_now.hour, datetime_now.minute, datetime_now.second)
-            pprint(request.data)
-            pprint(serializer.data)
-            #country = serializer.data.get('country')
-            country = request.data.get('country')
-            print(country)
-            register = serializer.data.get('register')
-            name = register if register else 'temp'
-            file_name = name + '_' + t_now + '.jpg'
+        datetime_now = datetime.datetime.now()
+        t_now = '{}_{}_{}_{}_{}_{}'.format(datetime_now.year, datetime_now.month, datetime_now.day, 
+                                            datetime_now.hour, datetime_now.minute, datetime_now.second)
+        
+        country = request.data.get('country')
+        name = request.user.username if request.user.username else 'temp'
+        file_name = name + '_' + t_now + '.jpg'
 
-            default_storage.save(file_name, file)
-            
-            # Load data
-            img = tf.keras.preprocessing.image.load_img("images/" + file_name, target_size=[224, 224])
+        default_storage.save(file_name, file)
+        
+        # Load data
+        img = tf.keras.preprocessing.image.load_img("images/" + file_name, target_size=[224, 224])
+        img = tf.keras.preprocessing.image.img_to_array(img)
+        img = tf.keras.applications.mobilenet_v2.preprocess_input(img[tf.newaxis,...])
+        
+        data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
+        headers = {"content-type": "application/json"}
 
-            img = tf.keras.preprocessing.image.img_to_array(img)
-            img = tf.keras.applications.mobilenet_v2.preprocess_input(img[tf.newaxis,...])
+        json_response = requests.post(
+            "http://localhost:8501/v1/models/mobilenet:predict", data=data, headers=headers
+        )
 
-
-
-            data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
-            headers = {"content-type": "application/json"}
-
-            json_response = requests.post(
-                "http://localhost:8501/v1/models/mobilenet:predict", data=data, headers=headers
-            )
-
-            predictions = np.array(json.loads(json_response.text)["predictions"])
-            # 0 => 영수증 아님, 1 => 영수증
-            is_receipts = np.argmax(predictions)
-            if is_receipts: 
-                global angle
-                angle_result = angle.calculate_angles("images/" + file_name)
-                print(angle_result)
-                if -10 <= angle_result[0] <= 10 or 80 <= angle_result[0] <= 100:
-                    OCR_result = image_NAVER_AI(img_string, country)
-                    
-                    #pprint.pprint(OCR_result)
-                    result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)        
-                    #pprint.pprint(result)
-                    for idx, item in enumerate(result.get('items')):
-                        translated = enko.enko_translation(item.get('item'))
-                        result['items'][idx]['item_translated'] = translated
-                    return JsonResponse(result)
-                else:
-                    return JsonResponse({'result':'영수증이 너무 기울었습니다.'})
+        predictions = np.array(json.loads(json_response.text)["predictions"])
+        # 0 => 영수증 아님, 1 => 영수증
+        is_receipts = np.argmax(predictions)
+        if is_receipts: 
+            global angle
+            angle_result = angle.calculate_angles("images/" + file_name)
+            if -10 <= angle_result[0] <= 10 or 80 <= angle_result[0] <= 100:
+                OCR_result = image_NAVER_AI(img_string, country)
+                result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)
+                for idx, item in enumerate(result.get('items')):
+                    translated = enko.enko_translation(item.get('item'))
+                    result['items'][idx]['item_translated'] = translated
+                return JsonResponse(result)
             else:
-                return JsonResponse({'result':'영수증이 아닙니다.'})
+                return JsonResponse({'result':'영수증이 너무 기울었습니다.'})
+        else:
+            return JsonResponse({'result':'영수증이 아닙니다.'})
             
-                        
             # serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # def get(self, request, format=None):
-    #     try:
-    #         boards = User.objects.get(pk=request.user.pk).boards.all()
-    #     except:
-    #         return JsonResponse({'error':'No user'})
-    #     serializer = BoardsModelSerializer(boards, many=True)
-    #     return Response(serializer.data)
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-@api_view(['GET', 'POST'])
-def test(request):
-    # obj = Boards.objects.get(user_id=request.user.pk)
-    # if request.method == 'POST':
-    #     Boards.objects.create()
-    try:
-        file = request.FILES['image']
-    except:
-        data = {'result':'사진을 넣어주세요.'}
-        return JsonResponse(data)
-    b64_string = base64.b64encode(file.read()) # 이미지 bytes 형식
-    img_string = b64_string.decode('utf-8') # 네이버로 보내기 위해 string 전환
-    # embed() 
-
-    
-    # 파일 이름 수정하는 로직을 작성하자.
-    file.name = 'test.jpg'
-    default_storage.save(file.name, file)
-    
-    data = {'result':'사진이 저장되었습니다.'}    
-    # 
-    return JsonResponse(data)
 
 
 @api_view(['GET'])
@@ -211,14 +167,10 @@ def index(request):
 
 
 
-
-
-
-
-
-
-
 def exchange(request, mx):
+    '''
+    환율 정보를 가져와 DB에 저장하는 URL입니다.
+    '''
     exchange_SECRET_KEY=config('exchange_SECRET_KEY')
     
     for i in range(0, mx):

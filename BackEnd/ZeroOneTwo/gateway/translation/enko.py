@@ -1,4 +1,9 @@
-from konlpy.tag import Mecab
+import platform
+if platform.system() == 'Windows':
+    from eunjeon import Mecab
+else:
+    from konlpy.tag import Mecab
+
 import numpy as np
 import mxnet as mx
 import json

@@ -7,10 +7,12 @@ import {
   Button,
 } from '@material-ui/core';
 import ReceiptInsertForm from '../../components/receipt/receiptInsertForm';
+import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
 
 const InsertDialog = ({ open, onClose, boardId }) => {
+  const history = useHistory();
   const [image, setImage] = useState(null);
   const [date, setDate] = useState(null);
   const [language, setLanguage] = useState('');
@@ -31,17 +33,25 @@ const InsertDialog = ({ open, onClose, boardId }) => {
   const handleReceiptInsert = (e) => {
     e.preventDefault();
     let formData = new FormData();
-    formData.append('file', image);
-    console.log(formData);
-    let postData = {
-      date: moment(date).format('YYYY-MM-DDT') + '12:00:00',
-      country: language,
-      image: formData,
-      board: Number(boardId),
-    };
-    console.log(postData);
+    formData.append('image', image);
+    formData.append('date', moment(date).format('YYYY-MM-DDT') + '12:00:00');
+    formData.append('country', language);
+    formData.append('board', Number(boardId));
+
     try {
-      axios.post('http://13.124.235.236:8000/api/Receipts/', postData);
+      axios
+        .post('http://13.124.235.236:8000/receipts/', formData)
+        .then((res) => {
+          history.push({
+            pathname: '/result',
+            state: {
+              data: JSON.stringify(res),
+              date: moment(date).format('YYYY-MM-DD'),
+              image: URL.createObjectURL(image),
+              boardId: boardId,
+            },
+          });
+        });
     } catch (error) {
       console.log(error);
     }

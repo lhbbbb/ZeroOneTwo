@@ -3,8 +3,17 @@ import numpy as np
 import json
 import requests
 
+from data import preprocess
+
+# train, test, STEPS_PER_EPOCH = preprocess.load_data()
+
+# for image_batch, label_batch in test:
+#     print("Image batch shape: ", image_batch.shape)
+#     print("Label batch shape: ", label_batch.shape)
+    # break
+
 # Load data
-img = tf.io.read_file("rec.png")
+# img = tf.io.read_file("datasets/images/train/receipt/4.PNG")
 
 
 def decode_img(img):
@@ -19,7 +28,13 @@ def decode_img(img):
     return img
 
 
-img = decode_img(img).numpy()
+# img = decode_img(image_batch).numpy()
+
+img = tf.keras.preprocessing.image.load_img("datasets/images/test/receipt/receipt_image335.jpg", target_size=[224, 224])
+
+img = tf.keras.preprocessing.image.img_to_array(img)
+img = tf.keras.applications.mobilenet_v2.preprocess_input(
+    img[tf.newaxis,...])
 
 data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
 headers = {"content-type": "application/json"}

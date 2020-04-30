@@ -139,7 +139,7 @@ pointwise convolution은 출력의 채널을 바꿀 수 있으며, 1x1 conv하�
 
 텐서플로 서빙의 아키텍처는 다음과 같습니다.
 
-![Tensorflow Serving](.\assets\Tensorflow Serving.png)
+![Tensorflow Serving](./assets/Tensorflow Serving.png)
 
 - 파란색 : Client
 - 초록색 : Server
@@ -372,8 +372,6 @@ def parse_en(content):
     # 품목, 날짜
     r_items = r"[\d]+[.,][\d]*|TOTAL|TOTAAL"
     r_date = r"[\d]+[/:][\d]*"
-    # r_dollar = r'[$]'
-    # |WET TOTAL(NET TOTAL) 은 일단 제외
     r_total = r"^TOTAL|GRAND TOTAL|^TOTAAL"
     r_int = r"[\d]+"
     r_filters = (
@@ -400,7 +398,6 @@ def parse_en(content):
             else:
                 temp_items.append(" ".join(text_list))
             temp_max, temp_min = new_max, new_min
-            # items.append(' '.join(text_list))
         if any(re.search(r_date, t) for t in text_list):
             date.append(" ".join(text_list))
     items.append(temp_items)
@@ -409,7 +406,7 @@ def parse_en(content):
     result["title"] = title
     result["date"] = date[0] if date else ""
 
-    # Total, TOTAL. Grand Total // Amount Due, Amount Paid, Total Due, Total Owed
+    # Total, TOTAL. Grand Total
     total_str = ""
     for i in sum(items, []):
         if re.search(r_total, i.upper()):
@@ -448,130 +445,11 @@ def parse_en(content):
     result["items"] = items_result
 
     return result
-
-
-def parse_jp(content):
-    min_font_sizes = []
-    for c in content["images"][0]["fields"]:
-        temp_font_size = max(
-            map(lambda y: y["y"], c["boundingPoly"]["vertices"])
-        ) - min(map(lambda y: y["y"], c["boundingPoly"]["vertices"]))
-        min_font_sizes.append(temp_font_size)
-    min_font_size = min(min_font_sizes)
-
-    texts = []
-    temp_texts = []
-    temp_y = 0
-    for c in content["images"][0]["fields"]:
-        max_y = max(map(lambda y: y["y"], c["boundingPoly"]["vertices"]))
-        if abs(temp_y - max_y) > min_font_size and temp_texts != []:
-            texts.append(temp_texts)
-            temp_texts = []
-        temp_max = max(list(map(lambda x: x["x"], c["boundingPoly"]["vertices"])))
-        temp_min = min(list(map(lambda x: x["x"], c["boundingPoly"]["vertices"])))
-        temp_texts.append({"text": c["inferText"], "min": temp_min, "max": temp_max})
-        temp_y = max_y
-    texts.append(temp_texts)
-    pprint(texts)
-
-    r_items = r"¥|TOTAL|合計"
-    r_date = r"[\d]+[/:][\d]*"
-    r_total = r"^TOTAL|(合計)+[\s]+"
-    r_int = r"[\d]+"
-    r_filters = (
-        r"合計|小計|小 計|お預り|お釣り|内税|象 計|TOTAL|SERVICE|CHANGE|TAX|^[\d.,\s]*$|[\d]+[)]$"
-    )
-
-    temp_max = 0
-    temp_min = 0
-    temp_items = []
-    title = ""
-    items = []
-    date = []
-    for idx, text in enumerate(texts):
-        text_list = list(map(lambda x: x["text"], text))
-        if idx == 0:
-            title = " ".join(text_list)
-        if any(re.search(r_items, t.upper()) for t in text_list):
-            new_max = max(list(map(lambda x: x["max"], text)))
-            new_min = min(list(map(lambda x: x["min"], text)))
-            if abs(temp_max - new_max) > 2 and abs(temp_min - new_min) > 2:
-                items.append(temp_items)
-                temp_items = [" ".join(text_list)]
-            else:
-                temp_items.append(" ".join(text_list))
-            temp_max, temp_min = new_max, new_min
-        if any(re.search(r_date, t) for t in text_list):
-            date.append(" ".join(text_list))
-    items.append(temp_items)
-
-    result = {}
-    result["title"] = title
-    result["date"] = date[0] if date else ""
-    print(title)
-    pprint(items)
-    pprint(date)
-
-    total_str = ""
-    for i in sum(items, []):
-        print(i)
-        if re.search(r_total, i.upper()):
-            total_strs = re.findall(r_int, i)
-            for idx, s in enumerate(total_strs):
-                if idx == len(total_strs) - 1 and len(total_strs) != 1 and len(s) == 2:
-                    total_str += f".{s}"
-                else:
-                    total_str += s
-    result["total"] = total_str
-
-    new_items = []
-    for i in items:
-        temp = []
-        for j in i:
-            if re.search(r_filters, j.upper()):
-                continue
-            else:
-                temp.append(j)
-        new_items.append(temp)
-
-    r_price = r"[\d.,\s]*$"
-    individual_items = list(
-        filter(lambda x: len(x) == max(map(lambda y: len(y), new_items)), new_items)
-    )
-    items_result = []
-    item_id = 1
-    for i in individual_items[0]:
-        if re.search(r_filters, i.upper()):
-            continue
-        else:
-            print(i)
-            r_yen = re.compile(r"(¥)")
-            j = r_yen.sub("", i)
-            price = re.findall(r_price, j)
-            price_org = "".join(price)
-            price_str = price_org.replace(" ", "")
-            if len(price_str) >= 3 and price_str[-3] in [",", "."]:
-                price_str = price_str.replace(",", "").replace(".", "")
-                price_str = price_str[:-2] + "." + price_str[-2:]
-            else:
-                price_str = price_str.replace(",", "").replace(".", "")
-            r_price_filter = re.compile(price_org + r"|€|£")
-            item = r_price_filter.sub("", j)
-            items_result.append({"item_id": item_id, "item": item, "price": price_str})
-            item_id += 1
-    result["items"] = items_result
-
-    return result
 ```
 
-OCR에서 제공하는 위치데이터와 정규표현식을 이용해 Text Classification을 적용합니다. 현재 영어와 일본어가 가능합니다.
+OCR에서 제공하는 위치데이터와 정규표현식을 이용해 Text Classification을 적용합니다. 현재 영어와 일본어가 가능합니다. 위 코드는 영어 데이터 분류 버전입니다. 
 
-1. 데이터 보정
-2. NLP 데이터 파싱
-3. 특성에 따른 군집화 이후 처리
-4. 정규표현식
-
-의 과정을 거칩니다.
+OCR post-processing은 Text correction(error correction)과 Data parsing(text classification), 두 가지 작업이 진행 될 수 있습니다. Text correction은 학습된 모델을 통해 오타 혹은 잘못 인식된 글자를 보정하는 작업입니다. Text classification은 주로 정규표현식을 이용해서 하고 있지만 최근 clova에서 NLP를 이용하는 방법을 논문으로 발표한 바 있습니다. 
 
 
 
@@ -625,7 +503,7 @@ Gluon은 TensorFlow의 Symbolic 방식과 Pytorch의 Imperative 방식을 모두
 
 one hot encoding이 범주형 데이터에 대해서 속성화하는 것에는 유용한 기법이지만 단어와 같이 차원이 클 경우 비효율적인 방법롭이 됩니다. 이 때문에 word2vector를 이용합니다.
 
-![vector](.\assets\vector.png)
+![vector](./assets/vector.png)
 
 word2vector는 밀집(dense) 벡터로 단어를 표현함에 따라 차원이 기하급수적으로 늘어나는 것을 방지하는 장점과 더불어 단어 벡터를 기반으로 유사한 단어와의 의미적 관계를 유추할 수 있다는 장점을 가지고 있습니다. 과도한 일반화로 인한 overfitting의 위험이 있습니다. 이번 프로젝트에서는 gensim을 사용했습니다.
 

@@ -109,13 +109,11 @@ def save_receipts(request):
         return JsonResponse({"result":"날짜형식이 잘못되었습니다."})
     receipt.total = data.get('total')
     receipt.board = Boards.objects.get(pk=data.get('board_id'))
-    receipt.board = data.get('board_id')
     receipt.image = data.get('image')
     receipt.country = data.get('country')
     receipt.save()
     
     for item in data.get('items'):
-        embed()
         temp_item = Items.objects.create()
         temp_item.receipt = receipt
         temp_item.origin_name = item.get('item')
@@ -143,6 +141,7 @@ class ReceiptsDataView(generics.GenericAPIView):
     queryset = ''
     
     def get(self, request, format=None):
+        
         pass
 
     def post(self, request, format=None):
@@ -161,6 +160,7 @@ class ReceiptsDataView(generics.GenericAPIView):
                                             datetime_now.hour, datetime_now.minute, datetime_now.second)
         
         country = request.data.get('country')
+        
         name = request.user.username if request.user.username else 'temp'
         file_name = name + '_' + t_now + '.jpg'
 

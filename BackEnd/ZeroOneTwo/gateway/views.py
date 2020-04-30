@@ -109,12 +109,10 @@ def save_receipts(request):
         return JsonResponse({"result":"날짜형식이 잘못되었습니다."})
     receipt.total = data.get('total')
     receipt.board = Boards.objects.get(pk=data.get('board_id'))
-    receipt.board = data.get('board_id')
     receipt.image = data.get('image')
     receipt.save()
     
     for item in data.get('items'):
-        embed()
         temp_item = Items.objects.create()
         temp_item.receipt = receipt
         temp_item.origin_name = item.get('item')

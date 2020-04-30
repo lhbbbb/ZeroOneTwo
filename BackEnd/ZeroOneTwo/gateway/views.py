@@ -16,6 +16,7 @@ import requests
 import json
 import datetime
 import base64
+import platform
 
 import tensorflow as tf
 import numpy as np
@@ -35,6 +36,10 @@ from .parse import parse_en, parse_jp
 from .check_image import angle
 from .translation import enko, naver_api
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
+SYSTEM = platform.system()
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserModelSerializer
@@ -91,6 +96,36 @@ def get_receipts(request, board_id):
     receipts = list(Receipts.objects.filter(board=board_id).values())
     return JsonResponse({"data": receipts})
 
+
+# @method_decorator(csrf_exempt)
+@api_view(['POST'])
+def save_receipts(request):
+    data = request.data
+    receipt = Receipts.objects.get(pk=data['receipt_id'])
+    receipt.title = data.get('title')
+    try:
+        receipt.date = data.get('date')
+    except:
+        return JsonResponse({"result":"날짜형식이 잘못되었습니다."})
+    receipt.total = data.get('total')
+    receipt.board = Boards.objects.get(pk=data.get('board_id'))
+    receipt.board = data.get('board_id')
+    receipt.image = data.get('image')
+    receipt.save()
+    
+    for item in data.get('items'):
+        embed()
+        temp_item = Items.objects.create()
+        temp_item.receipt = receipt
+        temp_item.origin_name = item.get('item')
+        temp_item.trans_name = item.get('item_translated')
+        temp_item.price = item.get('price')
+        temp_item.save()
+
+    return JsonResponse({"result": "saved!"})
+    
+
+
 @api_view(["GET"])
 def get_items(request, receipt_id):
     '''
@@ -137,10 +172,13 @@ class ReceiptsDataView(generics.GenericAPIView):
         
         data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
         headers = {"content-type": "application/json"}
-
-        json_response = requests.post(
-            "http://localhost:8501/v1/models/mobilenet:predict", data=data, headers=headers
-        )
+        
+        if SYSTEM == 'Windows':
+            json_response = requests.post(
+                "http://i02a408.p.ssafy.io:8501/v1/models/mobilenet:predict", data=data, headers=headers)  
+        else: 
+            json_response = requests.post(
+                "http://localhost:8501/v1/models/mobilenet:predict", data=data, headers=headers)
 
         predictions = np.array(json.loads(json_response.text)["predictions"])
         # 0 => 영수증 아님, 1 => 영수증
@@ -154,6 +192,12 @@ class ReceiptsDataView(generics.GenericAPIView):
                 for idx, item in enumerate(result.get('items')):
                     translated = enko.enko_translation(item.get('item'))
                     result['items'][idx]['item_translated'] = translated
+                if SYSTEM == 'Windows':
+                    result['image'] = 'http://localhost:8000/images/' + file_name
+                else:
+                    result['image'] = 'http://i02a408.p.ssafy.io:8000/images/' + file_name
+                temp_obj = Receipts.objects.create()
+                result['receipt_id'] = temp_obj.pk
                 return JsonResponse(result)
             else:
                 return JsonResponse({'result':'영수증이 너무 기울었습니다.'})

@@ -18,5 +18,6 @@ urlpatterns = [
     path('boards/', views.BoardsDataView.as_view()),
     path('boards/<int:board_id>/', views.get_receipts),
     path('receipts/', views.ReceiptsDataView.as_view()),
+    path('receipts/new/', views.save_receipts),
     path('receipts/<int:receipt_id>/', views.get_items),
 ]

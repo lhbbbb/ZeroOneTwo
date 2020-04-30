@@ -102,7 +102,7 @@ def get_receipts(request, board_id):
 def save_receipts(request):
     data = request.data
     receipt = Receipts.objects.get(pk=data['receipt_id'])
-    receipt.title = data.get('title')
+    receipt.place = data.get('title')
     try:
         receipt.date = data.get('date')
     except:
@@ -110,6 +110,7 @@ def save_receipts(request):
     receipt.total = data.get('total')
     receipt.board = Boards.objects.get(pk=data.get('board_id'))
     receipt.image = data.get('image')
+    receipt.country = data.get('country')
     receipt.save()
     
     for item in data.get('items'):
@@ -198,6 +199,7 @@ class ReceiptsDataView(generics.GenericAPIView):
                     result['image'] = 'http://i02a408.p.ssafy.io:8000/images/' + file_name
                 temp_obj = Receipts.objects.create()
                 result['receipt_id'] = temp_obj.pk
+                result['country'] = country
                 return JsonResponse(result)
             else:
                 return JsonResponse({'result':'영수증이 너무 기울었습니다.'})

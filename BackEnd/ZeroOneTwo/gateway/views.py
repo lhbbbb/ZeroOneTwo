@@ -39,6 +39,8 @@ from .translation import enko, naver_api
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
+from .naverNMT import papago_translation
+
 SYSTEM = platform.system()
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -191,7 +193,7 @@ class ReceiptsDataView(generics.GenericAPIView):
                 OCR_result = image_NAVER_AI(img_string, country)
                 result = parse_jp(OCR_result) if country == 'jp' else parse_en(OCR_result)
                 for idx, item in enumerate(result.get('items')):
-                    translated = enko.enko_translation(item.get('item'))
+                    translated = papago_translation(item.get('item'), country)
                     result['items'][idx]['item_translated'] = translated
                 if SYSTEM == 'Windows':
                     result['image'] = 'http://localhost:8000/images/' + file_name

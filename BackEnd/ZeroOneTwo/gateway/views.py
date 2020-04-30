@@ -91,6 +91,15 @@ def get_receipts(request, board_id):
     receipts = list(Receipts.objects.filter(board=board_id).values())
     return JsonResponse({"data": receipts})
 
+@api_view(["GET"])
+def get_items(request, receipt_id):
+    '''
+    특정 영수증에 해당하는 모든 항목들을 반환합니다.
+    receipt의 id를 url로 전달해야합니다.
+    '''
+    items = list(Items.objects.filter(receipt=receipt_id).values())
+    return JsonResponse({"data": items})
+
 
 # Receipts URL
 class ReceiptsDataView(generics.GenericAPIView):

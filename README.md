@@ -70,7 +70,7 @@ $ pip install -r requirements_windows.txt
 $ python manage.py runserver
 ```
 
-Windows의 경우 Mecah 기능을 사용하기 위해 Eunjeon 라이브러리를 사용합니다.
+Windows의 경우 Mecab 기능을 사용하기 위해 Eunjeon 라이브러리를 사용합니다.
 
 
 
@@ -82,14 +82,14 @@ Windows의 경우 Mecah 기능을 사용하기 위해 Eunjeon 라이브러리를
 
 영수증인지 아닌지를 판별하는 분류모델에서 구글의 MobileNet V2를 사용했습니다. Transfer Learning을 통해 이미 학습된 모델을 가져온 후 마지막 classifier 부분만 학습되도록 진행하였습니다.
 
-##### Why MobilelNet
+##### Why MobileNet
 
-막대한 컴퓨팅파워를 가진 환경이라면 어떤 모델을 넣더라도 학습과 추론에 전혀 문제가 되지 않습니다. 하지만 우리가 목적으로 하는 서비스는
+막대한 컴퓨팅파워를 가진 환경이라면 어떤 모델을 넣더라도 학습과 추론에 전혀 문제가 되지 않습니다. 하지만 우리가 목적으로 하는 서비스는 아래의  조건을 충족해야합니다.
 
-GPU가 없는 서버에서 돌아가야하고
-영수증을 판별하는 부분이 서비스의 시작 부분이기 때문에 빠른 결과물을 보여줘야 한다.
+1. GPU가 없는 서버에서 돌아가야하고
+2. 영수증을 판별하는 부분이 서비스의 시작 부분이기 때문에 빠른 결과물을 보여줘야 한다.
 
-는 점을 생각해야 합니다. 고성능 환경을 고려한 모델을 사용한다면 결과를 보기 전에 훈련하는 것조차 힘들 수 있기에 컴퓨터 성능이 제한되거나 배터리 퍼포먼스가 중요한 곳에서 사용될 목적으로 설계된 CNN 구조인 MobileNet 모델을 사용하게 되었습니다. MobileNet V2 모델은 기존의 MobileNet에서 CNN구조를 약간 더 수정하여 파라미터 수와 연산량을 더욱 줄인 네트워크입니다. 이 모델을 사용한다면 ResNet, VGGNet과 같은 모델과 비교했을 때 비교적 퍼포먼스가 떨어질 순 있지만, 경량화된 모델을 사용함으로써 빠른 결과물을 얻을 수 있습니다.
+고성능 환경을 고려한 모델을 사용한다면 결과를 보기 전에 훈련하는 것조차 힘들 수 있기에 컴퓨터 성능이 제한되거나 배터리 퍼포먼스가 중요한 곳에서 사용될 목적으로 설계된 CNN 구조인 MobileNet 모델을 사용하게 되었습니다. MobileNet V2 모델은 기존의 MobileNet에서 CNN구조를 약간 더 수정하여 파라미터 수와 연산량을 더욱 줄인 네트워크입니다. 이 모델을 사용한다면 ResNet, VGGNet과 같은 모델과 비교했을 때 비교적 퍼포먼스가 떨어질 순 있지만, 경량화된 모델을 사용함으로써 빠른 결과물을 얻을 수 있습니다.
 
 ##### MobileNet
 
@@ -97,7 +97,7 @@ MobileNet의 아키텍처는 다음과 같습니다.
 
 ![MobileNet](./assets/MobileNet.png)
 
-depthwise convolution은 채널별로 분리하여 각 채널을 각각의 커널로 convolution 하는 것입니다.
+depthwise convolution은 채널별로 분리하여 각 채널을 개별 커널로 convolution 하는 것입니다.
 이때, 입력의 채널과 출력의 채널은 항상 같습니다.
 pointwise convolution은 출력의 채널을 바꿀 수 있으며, 1x1 conv하는 것을 말합니다.
 이렇게 하면 어떤 장점이 있는지 파라미터량 관점에서 확인해 보겠습니다.
@@ -123,7 +123,7 @@ pointwise convolution은 출력의 채널을 바꿀 수 있으며, 1x1 conv하�
   - Serving시 Python 사용하면 퍼포먼스가 상대적으로 좋지 않음
   - 어려운 이유
     - C++ code, Tensorflow 사용하는 사람들은 대부분 Python만 익숙
-    - Kubernetes gRPC, bazel? 모르는 용어 투성이
+    - Kubernetes gRPC, bazel 등 낯선 용어 투성이
     - Compile 필요하고 오래 걸림
 - Google Cloud CloudML
   - 장점 : 쉬움! CloudML이 다 해줌
@@ -461,7 +461,7 @@ Neural Machine Translation을 위해 Apache의 MXNet Gluon을 사용했습니다
 
 ##### Why Gluon?
 
-Tensorflow는 API가 직관적이지 않으며 딥러닝 영역도 생소합니다. 그와더불어 디버깅이 어려워 정확하게 원하는 방향으로 모형을 만들었는지 확인이 힘듭니다. 이 부분에서 보통 Keras를 이용해 모델을 구현하면 수 많은 레퍼런스가 존재합니다. 하지만 NLP 모델링을 위해 seq2seq를 구현하는 것에 Keras로 구현하기 매우 힘듭니다. 디버깅에 더욱 직관적인 모델로 Gluon을 사용하기로 결정합니다.
+Tensorflow는 API가 직관적이지 않으며 딥러닝 영역도 생소합니다. 그와 더불어 디버깅이 어려워 정확하게 원하는 방향으로 모형을 만들었는지 확인이 힘듭니다. 이 부분에서 보통 Keras를 이용해 모델을 구현하면 수 많은 레퍼런스가 존재합니다. 하지만 NLP 모델링을 위해 seq2seq를 구현하는 것에 Keras로 구현하기 매우 힘듭니다. 디버깅에 더욱 직관적인 모델로 Gluon을 사용하기로 결정합니다.
 
 Gluon은 TensorFlow의 Symbolic 방식과 Pytorch의 Imperative 방식을 모두 지원합니다.
 
@@ -501,7 +501,7 @@ Gluon은 TensorFlow의 Symbolic 방식과 Pytorch의 Imperative 방식을 모두
 | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ----- | ----- | ----- | ----- |
 | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 0    | 1    | 0    | 0     | 0     | 0     | 0     |
 
-one hot encoding이 범주형 데이터에 대해서 속성화하는 것에는 유용한 기법이지만 단어와 같이 차원이 클 경우 비효율적인 방법롭이 됩니다. 이 때문에 word2vector를 이용합니다.
+one hot encoding이 범주형 데이터에 대해서 속성화하는 것에는 유용한 기법이지만 단어와 같이 차원이 클 경우 비효율적인 방법론이 됩니다. 이 때문에 word2vector를 이용합니다.
 
 ![vector](./assets/vector.png)
 
@@ -919,7 +919,7 @@ print("training : prepare data")
     vocab_size = len(w2idx)
     n_hidden = opt.hidden_size
     embed_dim = embed_dim
-    #embedding network에 넣을 행렬   
+    #embedding network에 넣을 행렬   
     embed_weights  = load_embedding("en_ko.np")
     #문장의 마지막을 인식할 인덱스 
     end_idx = w2idx['END']
